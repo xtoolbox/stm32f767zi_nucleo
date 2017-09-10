@@ -1,0 +1,14 @@
+from building import *
+
+cwd = GetCurrentDir()
+path = [cwd + '/JPEG']
+
+srcx = Glob('JPEG/*.c')
+src = []
+for t in srcx:
+    if t.name.find('template') == -1:
+        src.append(t)
+
+group = DefineGroup('Utilities', src, depend = [''], CPPPATH = path)
+
+Return('group')

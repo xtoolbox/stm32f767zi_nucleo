@@ -1,0 +1,9 @@
+from building import *
+
+cwd = GetCurrentDir()
+src = Glob('*.s')
+
+
+group = DefineGroup('Applications/startup', src, depend = [''])
+
+Return('group')

@@ -1,0 +1,9 @@
+from building import *
+
+cwd = GetCurrentDir()
+
+CPPPATH = [cwd]
+
+group = DefineGroup('Application/Drivers', [], depend = [''], CPPPATH = CPPPATH)
+
+Return('group')
