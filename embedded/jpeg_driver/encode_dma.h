@@ -42,12 +42,16 @@
 /* Includes ------------------------------------------------------------------*/
 #include "jpeg_driver.h"
 
-
+typedef struct{
+	uint8_t* data;
+	uint32_t total_length;
+	uint32_t current_length;
+}jpeg_dest_t;
 /* Exported variables --------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-uint32_t JPEG_Encode_DMA(JPEG_HandleTypeDef *hjpeg, uint32_t RGBImageBufferAddress, uint32_t RGBImageSize_Bytes, uint8_t *jpgfile);
+uint32_t JPEG_Encode_DMA(JPEG_HandleTypeDef *hjpeg, uint32_t RGBImageBufferAddress, uint32_t RGBImageSize_Bytes, jpeg_dest_t *jpgfile);
 uint32_t JPEG_EncodeOutputHandler(JPEG_HandleTypeDef *hjpeg);
 void JPEG_EncodeInputHandler(JPEG_HandleTypeDef *hjpeg);
 

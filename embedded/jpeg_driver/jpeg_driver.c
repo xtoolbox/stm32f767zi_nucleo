@@ -51,17 +51,43 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
+#define   JPEG_SHOW_SRC   1
+#define   JPEG_SHOW_DST   2
+#define   JPEG_ENCODE     3
+#define   JPEG_DECODE     4
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 
-JPEG_HandleTypeDef    JPEG_Handle;
+extern JPEG_HandleTypeDef hjpeg;
 uint32_t RGB_ImageAddress;
 
-uint8_t  jpeg_data[16];
+uint8_t  jpeg_data[32*1024];
+jpeg_dest_t jout;
+
+rt_mailbox_t  jpeg_mb = 0;
+uint8_t*  show_addr = 0;
+uint32_t  show_length = 0;
+
+static void show_data(void)
+{
+	uint32_t len = show_length;
+	uint8_t* pos = show_addr;
+	uint32_t i = 0;
+	if(len <= 0) len = 16;
+	if(len > 1024*20) len = 1024*20;
+	for(i=0;i<len;++i){
+		rt_kprintf("%02x ", *pos);
+		pos++;
+		if( (i&15) == 15){
+			rt_kprintf("\n");
+		}
+	}
+}
 
 static void jpeg_main(void *parameter)
 {
   uint32_t JpegEncodeProcessing_End = 0;
+	rt_uint32_t mb_value = 0;
   
 #if (JPEG_RGB_FORMAT == JPEG_ARGB8888)
   RGB_ImageAddress = (uint32_t)Image_ARGB8888;
@@ -70,27 +96,43 @@ static void jpeg_main(void *parameter)
   RGB_ImageAddress = (uint32_t)Image_RGB888;
   
 #elif(JPEG_RGB_FORMAT == JPEG_RGB565)
-  RGB_ImageAddress = (uint32_t)Image_RGB565;
+  RGB_ImageAddress = (uint32_t)IMAGE_ADDRESS;//Image_RGB565;
   
 #endif /* JPEG_RGB_FORMAT */
   
+	jpeg_mb = rt_mb_create("jpeg_mb", 16, 0);
+	if(!jpeg_mb){
+		rt_kprintf("rt_mb_create fail\n");
+		while(1)rt_thread_delay(RT_TICK_PER_SECOND/2);
+	}
+	JPEG_InitColorTables();
 	rt_kprintf("jpeg thread running...\n");
   while(1){
-		rt_thread_delay(RT_TICK_PER_SECOND/2);
+		rt_mb_recv(jpeg_mb, &mb_value, RT_WAITING_FOREVER);
+		switch(mb_value){
+			case JPEG_SHOW_SRC:
+			case JPEG_SHOW_DST:
+				show_data();
+				break;
+			case JPEG_ENCODE:
+				rt_kprintf("start encode \n");
+				jout.data = jpeg_data;
+				jout.current_length = 0;
+				jout.total_length = sizeof(jpeg_data);
+				JPEG_Encode_DMA(&hjpeg, RGB_ImageAddress, RGB_IMAGE_HEIGHT * RGB_IMAGE_WIDTH *2, &jout);
+				do{
+					JPEG_EncodeInputHandler(&hjpeg);
+					JpegEncodeProcessing_End = JPEG_EncodeOutputHandler(&hjpeg);
+				}while(JpegEncodeProcessing_End == 0);
+				rt_kprintf("encode done\n");
+				break;
+			case JPEG_DECODE:
+				rt_kprintf("start decode \n");
+				break;
+		}
+		
+		//rt_thread_delay(RT_TICK_PER_SECOND/2);
 	}
-	
-  /*##-1- JPEG Initialization ################################################*/   
-  /* Init The JPEG Color Look Up Tables used for YCbCr to RGB conversion   */ 
-  JPEG_InitColorTables();
-	
-	
-	JPEG_Encode_DMA(&JPEG_Handle, RGB_ImageAddress, RGB_IMAGE_SIZE, jpeg_data);
-	
-	do{
-		JPEG_EncodeInputHandler(&JPEG_Handle);
-		JpegEncodeProcessing_End = JPEG_EncodeOutputHandler(&JPEG_Handle);
-	}while(JpegEncodeProcessing_End == 0);
-  
   /* Infinite loop */
   while (1)
   {
@@ -145,8 +187,56 @@ long jpeg(void)
     return 0;
 }
 
-FINSH_FUNCTION_EXPORT(jpeg, say jpeg world);
+long jpeg_src_mem(int start, int len)
+{
+	int i = 0;
+	uint8_t* pos = (uint8_t*)(IMAGE_ADDRESS) + start;
+	if(len <= 0) len = 16;
+	if(len > 1024*20) len = 1024*20;
+	show_addr = pos;
+	show_length = len;
+	rt_mb_send(jpeg_mb, JPEG_SHOW_SRC);
+	/*
+	for(i=0;i<len;++i){
+		rt_kprintf("%02x ", *pos);
+		pos++;
+		if( (i&15) == 15){
+			rt_kprintf("\n");
+		}
+	}*/
+	return len;
+}
 
+long jpeg_dst_mem(int start, int len)
+{
+	int i = 0;
+	uint8_t* pos = (uint8_t*)(jpeg_data) + start;
+	if(len <= 0) len = 16;
+	if(len > 1024*20) len = 1024*20;
+	show_addr = pos;
+	show_length = len;
+	rt_mb_send(jpeg_mb, JPEG_SHOW_SRC);
+	/*
+	for(i=0;i<len;++i){
+		rt_kprintf("%02x ", *pos);
+		pos++;
+		if( (i&15) == 15){
+			rt_kprintf("\n");
+		}
+	}*/
+	return jout.current_length;
+}
+
+long jpeg_encode(void)
+{
+	rt_mb_send(jpeg_mb, JPEG_ENCODE);
+	return 1;
+}
+
+FINSH_FUNCTION_EXPORT(jpeg, say jpeg world);
+FINSH_FUNCTION_EXPORT(jpeg_src_mem, show image memory);
+FINSH_FUNCTION_EXPORT(jpeg_dst_mem, show dst memory);
+FINSH_FUNCTION_EXPORT(jpeg_encode, jpeg encode);
 
 void OnError_Handler(void)
 {

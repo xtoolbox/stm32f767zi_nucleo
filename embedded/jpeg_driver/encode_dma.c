@@ -38,6 +38,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "encode_dma.h"
+#include "string.h"
 /** @addtogroup STM32F7xx_HAL_Examples
   * @{
   */
@@ -98,6 +99,7 @@ uint32_t RGB_InputImageIndex;
 uint32_t RGB_InputImageSize_Bytes;
 uint32_t RGB_InputImageAddress;
 
+jpeg_dest_t* pJpegFile = 0;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -108,9 +110,12 @@ uint32_t RGB_InputImageAddress;
   * @param  DestAddress : ARGB destination Frame Buffer Address.
   * @retval None
   */
-uint32_t JPEG_Encode_DMA(JPEG_HandleTypeDef *hjpeg, uint32_t RGBImageBufferAddress, uint32_t RGBImageSize_Bytes, uint8_t *jpgfile)
+uint32_t JPEG_Encode_DMA(JPEG_HandleTypeDef *hjpeg, uint32_t RGBImageBufferAddress, uint32_t RGBImageSize_Bytes, jpeg_dest_t *jpgfile)
 {
   uint32_t DataBufferSize = 0;
+	
+	pJpegFile = jpgfile;
+	jpgfile->current_length = 0;
 
   /* Reset all Global variables */
   MCU_TotalNb                = 0;
@@ -163,6 +168,15 @@ uint32_t JPEG_EncodeOutputHandler(JPEG_HandleTypeDef *hjpeg)
   if(Jpeg_OUT_BufferTab.State == JPEG_BUFFER_FULL)
   {  
     //f_write (pJpegFile, Jpeg_OUT_BufferTab.DataBuffer ,Jpeg_OUT_BufferTab.DataBufferSize, (UINT*)(&bytesWritefile)) ;
+		if(!pJpegFile){
+			OnError_Handler();
+		}
+		if(pJpegFile->current_length + Jpeg_OUT_BufferTab.DataBufferSize <= pJpegFile->total_length){
+			memcpy(pJpegFile->data + pJpegFile->current_length, Jpeg_OUT_BufferTab.DataBuffer, Jpeg_OUT_BufferTab.DataBufferSize);
+			pJpegFile->current_length += Jpeg_OUT_BufferTab.DataBufferSize;
+		}else{
+			OnError_Handler();
+		}
     
     Jpeg_OUT_BufferTab.State = JPEG_BUFFER_EMPTY;
     Jpeg_OUT_BufferTab.DataBufferSize = 0;

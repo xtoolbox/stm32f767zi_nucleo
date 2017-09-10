@@ -50,6 +50,7 @@
 #include "stm32f7xx_hal.h"
 
 extern DMA_HandleTypeDef hdma_jpeg_in;
+extern DMA_HandleTypeDef hdma_jpeg_out;
 
 extern void _Error_Handler(char *, int);
 /* USER CODE BEGIN 0 */
@@ -99,6 +100,9 @@ void HAL_JPEG_MspInit(JPEG_HandleTypeDef* hjpeg)
     __HAL_RCC_JPEG_CLK_ENABLE();
   
     /* JPEG DMA Init */
+    /* Enable DMA clock */
+  __DMA2_CLK_ENABLE();
+		
     /* JPEG_IN Init */
     hdma_jpeg_in.Instance = DMA2_Stream0;
     hdma_jpeg_in.Init.Channel = DMA_CHANNEL_9;
@@ -124,6 +128,40 @@ void HAL_JPEG_MspInit(JPEG_HandleTypeDef* hjpeg)
     HAL_NVIC_SetPriority(JPEG_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(JPEG_IRQn);
   /* USER CODE BEGIN JPEG_MspInit 1 */
+
+		
+		
+  /* Output DMA */
+  /* Set the parameters to be configured */ 
+  hdma_jpeg_out.Init.Channel = DMA_CHANNEL_9;
+  hdma_jpeg_out.Init.Direction = DMA_PERIPH_TO_MEMORY;
+  hdma_jpeg_out.Init.PeriphInc = DMA_PINC_DISABLE;
+  hdma_jpeg_out.Init.MemInc = DMA_MINC_ENABLE;
+  hdma_jpeg_out.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+  hdma_jpeg_out.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+  hdma_jpeg_out.Init.Mode = DMA_NORMAL;
+  hdma_jpeg_out.Init.Priority = DMA_PRIORITY_VERY_HIGH;
+  hdma_jpeg_out.Init.FIFOMode = DMA_FIFOMODE_ENABLE;         
+  hdma_jpeg_out.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+  hdma_jpeg_out.Init.MemBurst = DMA_MBURST_INC4;
+  hdma_jpeg_out.Init.PeriphBurst = DMA_PBURST_INC4;
+
+  
+  hdma_jpeg_out.Instance = DMA2_Stream1;
+  /* DeInitialize the DMA Stream */
+  HAL_DMA_DeInit(&hdma_jpeg_out);  
+  /* Initialize the DMA stream */
+  HAL_DMA_Init(&hdma_jpeg_out);
+
+  /* Associate the DMA handle */
+  __HAL_LINKDMA(hjpeg, hdmaout, hdma_jpeg_out);
+  
+	HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0x07, 0x0F);
+  HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);    
+	
+  HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0x07, 0x0F);
+  HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);  
+
 
   /* USER CODE END JPEG_MspInit 1 */
   }

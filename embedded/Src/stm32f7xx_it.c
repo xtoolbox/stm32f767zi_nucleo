@@ -42,6 +42,7 @@
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_OTG_FS;
 extern DMA_HandleTypeDef hdma_jpeg_in;
+extern DMA_HandleTypeDef hdma_jpeg_out;
 extern JPEG_HandleTypeDef hjpeg;
 extern UART_HandleTypeDef huart3;
 
@@ -124,7 +125,16 @@ void DMA2_Stream0_IRQHandler(void)
 
   /* USER CODE END DMA2_Stream0_IRQn 1 */
 }
+void DMA2_Stream1_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream0_IRQn 0 */
 
+  /* USER CODE END DMA2_Stream0_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_jpeg_out);
+  /* USER CODE BEGIN DMA2_Stream0_IRQn 1 */
+
+  /* USER CODE END DMA2_Stream0_IRQn 1 */
+}
 /**
 * @brief This function handles USB On The Go FS global interrupt.
 */

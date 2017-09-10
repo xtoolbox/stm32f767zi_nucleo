@@ -50,7 +50,8 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 #define RGB_IMAGE_WIDTH  ((uint32_t)320)  
 #define RGB_IMAGE_HEIGHT ((uint32_t)240)
-
+#define IMAGE_ADDRESS    (0x08000000+1024*1024)
+	
 
 #if (JPEG_RGB_FORMAT == JPEG_ARGB8888)
   #define RGB_IMAGE_SIZE  ((uint32_t)RGB_IMAGE_HEIGHT * RGB_IMAGE_WIDTH)

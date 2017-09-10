@@ -24,3 +24,7 @@ documentation/html
 resource
 DebugConfig
 *.htm
+*.uvguix.*
+*.pdf
+output
+*.txt

@@ -39,7 +39,7 @@
 #include "image_320_240_rgb.h"
 
 #if (JPEG_RGB_FORMAT == JPEG_RGB565)
-const uint32_t Image_RGB565[RGB_IMAGE_SIZE] =
+const uint32_t Image_RGB565[RGB_IMAGE_SIZE] __attribute__((at(IMAGE_ADDRESS))) =
 {
 0x22512251,
 0x22512251,

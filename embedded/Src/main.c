@@ -58,6 +58,7 @@
 
 JPEG_HandleTypeDef hjpeg;
 DMA_HandleTypeDef hdma_jpeg_in;
+DMA_HandleTypeDef hdma_jpeg_out;
 
 UART_HandleTypeDef huart3;
 
