@@ -1,0 +1,10 @@
+from building import *
+
+cwd = GetCurrentDir()
+src = Glob('Src/usbd_video.c')
+
+path = [cwd + '/Inc']
+
+group = DefineGroup('USB/Class/Video', src, depend = [''], CPPPATH = path)
+
+Return('group')

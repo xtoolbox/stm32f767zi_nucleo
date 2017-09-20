@@ -36,15 +36,16 @@
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __MAIN_H
-#define __MAIN_H
+#ifndef __JPEG_DRIVER_H
+#define __JPEG_DRIVER_H
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f7xx_hal.h"
-
+#include "rtthread.h"
 #include "jpeg_utils.h"
 #include "encode_dma.h"
 #include "board.h"
+#include "usbd_video.h"
 
 /* Exported variables --------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
@@ -55,8 +56,20 @@
 #define MAX_INPUT_LINES          16                     /* Set Input buffer lines to 16 for YCbCr420, and 8 for YCbCr422 and YCbCr444 (to save RAM space) */
 
 
-#define LCD_FRAME_BUFFER         0xC0000000
-  
+
+#define   JPEG_SHOW_SRC   1
+#define   JPEG_SHOW_DST   2
+#define   JPEG_ENCODE     3
+#define   JPEG_DECODE     4
+#define   JPEG_CAMERA_ON  5
+#define   JPEG_CAMERA_OFF 6
+#define   JPEG_CONTROL    7
+#define   JPEG_FRAME_DONE 8
+
+
+extern rt_mailbox_t  jpeg_mb;
+extern control_t     jpeg_control;
+
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void OnError_Handler(void);

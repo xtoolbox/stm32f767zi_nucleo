@@ -41,6 +41,7 @@
 #include "image_320_240_rgb.h"
 #include <rtthread.h>
 #include "finsh.h"
+#include "usbd_video.h"
 /** @addtogroup STM32F7xx_HAL_Examples
   * @{
   */
@@ -59,14 +60,18 @@
 /* Private variables ---------------------------------------------------------*/
 
 extern JPEG_HandleTypeDef hjpeg;
+extern USBD_HandleTypeDef hUsbDeviceFS;
 uint32_t RGB_ImageAddress;
 
 uint8_t  jpeg_data[32*1024];
 jpeg_dest_t jout;
 
 rt_mailbox_t  jpeg_mb = 0;
+control_t     jpeg_control;
+
 uint8_t*  show_addr = 0;
 uint32_t  show_length = 0;
+uint32_t  camera_on = 0;
 
 static void show_data(void)
 {
@@ -84,6 +89,8 @@ static void show_data(void)
 	}
 }
 
+int8_t  VIDEO_Start_Transmit_Video(USBD_HandleTypeDef *pdev, uint32_t length);
+
 static void jpeg_main(void *parameter)
 {
   uint32_t JpegEncodeProcessing_End = 0;
@@ -99,7 +106,11 @@ static void jpeg_main(void *parameter)
   RGB_ImageAddress = (uint32_t)IMAGE_ADDRESS;//Image_RGB565;
   
 #endif /* JPEG_RGB_FORMAT */
-  
+	
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+	DWT->CYCCNT = 0;
+	DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+	
 	jpeg_mb = rt_mb_create("jpeg_mb", 16, 0);
 	if(!jpeg_mb){
 		rt_kprintf("rt_mb_create fail\n");
@@ -107,6 +118,8 @@ static void jpeg_main(void *parameter)
 	}
 	JPEG_InitColorTables();
 	rt_kprintf("jpeg thread running...\n");
+	//rt_mb_send(jpeg_mb, JPEG_DECODE);
+	//rt_thread_delay(1000);
   while(1){
 		rt_mb_recv(jpeg_mb, &mb_value, RT_WAITING_FOREVER);
 		switch(mb_value){
@@ -124,19 +137,38 @@ static void jpeg_main(void *parameter)
 					JPEG_EncodeInputHandler(&hjpeg);
 					JpegEncodeProcessing_End = JPEG_EncodeOutputHandler(&hjpeg);
 				}while(JpegEncodeProcessing_End == 0);
-				rt_kprintf("encode done\n");
+				rt_kprintf("encode done %d (%x)\n", jout.current_length, jout.current_length);
+				
+				if(camera_on){
+					VIDEO_Send_Video(&hUsbDeviceFS, jout.data, jout.current_length);
+				}
 				break;
 			case JPEG_DECODE:
-				rt_kprintf("start decode \n");
+				rt_kprintf("start decode not implemnet\n");
+				break;
+			case JPEG_CAMERA_ON:
+				rt_kprintf("camera on\n");
+				camera_on = 1;
+			  rt_mb_send(jpeg_mb, JPEG_ENCODE);
+				break;
+			case JPEG_CAMERA_OFF:
+				rt_kprintf("camera off\n");
+				camera_on = 0;
+				break;
+			case JPEG_CONTROL:
+				rt_kprintf("control x:%d, y:%d, btn:%x\n", jpeg_control.x, jpeg_control.y, jpeg_control.button);
+				break;
+			case JPEG_FRAME_DONE:
+				if(camera_on){
+					// TODO : we can update the image frame here
+					VIDEO_Send_Video(&hUsbDeviceFS, jout.data, jout.current_length);
+				}
 				break;
 		}
 		
 		//rt_thread_delay(RT_TICK_PER_SECOND/2);
 	}
   /* Infinite loop */
-  while (1)
-  {
-  }
 }
 
 /**
@@ -189,7 +221,7 @@ long jpeg(void)
 
 long jpeg_src_mem(int start, int len)
 {
-	int i = 0;
+	//int i = 0;
 	uint8_t* pos = (uint8_t*)(IMAGE_ADDRESS) + start;
 	if(len <= 0) len = 16;
 	if(len > 1024*20) len = 1024*20;
@@ -209,7 +241,7 @@ long jpeg_src_mem(int start, int len)
 
 long jpeg_dst_mem(int start, int len)
 {
-	int i = 0;
+	//int i = 0;
 	uint8_t* pos = (uint8_t*)(jpeg_data) + start;
 	if(len <= 0) len = 16;
 	if(len > 1024*20) len = 1024*20;
@@ -233,10 +265,25 @@ long jpeg_encode(void)
 	return 1;
 }
 
+long jpeg_debug(void)
+{
+	return 1;
+}
+uint32_t xfer_length;
+long jpeg_set_length(int len)
+{
+	if(len < 0) len = 1024;
+	if(len > 1024*20) len = 1024*20;
+	xfer_length = len;
+	return xfer_length;
+}
+
 FINSH_FUNCTION_EXPORT(jpeg, say jpeg world);
 FINSH_FUNCTION_EXPORT(jpeg_src_mem, show image memory);
 FINSH_FUNCTION_EXPORT(jpeg_dst_mem, show dst memory);
 FINSH_FUNCTION_EXPORT(jpeg_encode, jpeg encode);
+FINSH_FUNCTION_EXPORT(jpeg_debug, jpeg debug);
+FINSH_FUNCTION_EXPORT(jpeg_set_length, jpeg set length);
 
 void OnError_Handler(void)
 {

@@ -373,7 +373,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F767xx, USE_HAL_DRIVER, RT_USING_ARM_LIBC</Define>
               <Undefine></Undefine>
-              <IncludePath>board_driver;Inc;drivers\CMSIS\Device\ST\STM32F7xx\Include;drivers\CMSIS\Include;drivers\STM32F7xx_HAL_Driver\Inc;jpeg_driver;Middlewares\ST\STM32_USB_Device_Library\Class\AUDIO\Inc;Middlewares\ST\STM32_USB_Device_Library\Core\Inc;Src;.;Utilities\JPEG;..\..\rt-thread\include;..\..\rt-thread\libcpu\arm\cortex-m7;..\..\rt-thread\libcpu\arm\common;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\spi;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\finsh;..\..\rt-thread\components\gui\include;..\..\rt-thread\components\libc\armlibc;..\..\rt-thread\components\libc\pthreads</IncludePath>
+              <IncludePath>board_driver;Inc;drivers\CMSIS\Device\ST\STM32F7xx\Include;drivers\CMSIS\Include;drivers\STM32F7xx_HAL_Driver\Inc;jpeg_driver;Middlewares\ST\STM32_USB_Device_Library\Class\AUDIO\Inc;Middlewares\ST\STM32_USB_Device_Library\Class\VIDEO\Inc;Middlewares\ST\STM32_USB_Device_Library\Core\Inc;Src;.;Utilities\JPEG;..\..\rt-thread\include;..\..\rt-thread\libcpu\arm\cortex-m7;..\..\rt-thread\libcpu\arm\common;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\spi;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\finsh;..\..\rt-thread\components\gui\include;..\..\rt-thread\components\libc\armlibc;..\..\rt-thread\components\libc\pthreads</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -875,6 +875,41 @@
               <FileName>Image_rgb_565.c</FileName>
               <FileType>1</FileType>
               <FilePath>jpeg_driver\Image_rgb_565.c</FilePath>
+            </File>
+            <File>
+              <FileName>Image_rgb_888.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>jpeg_driver\Image_rgb_888.c</FilePath>
+            </File>
+            <File>
+              <FileName>encode_dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>jpeg_driver\encode_dma.c</FilePath>
+            </File>
+            <File>
+              <FileName>jpeg_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>jpeg_driver\jpeg_driver.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Applications/startup</GroupName>
+          <Files>
+            <File>
+              <FileName>startup_stm32f767xx.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>MDK-ARM\startup_stm32f767xx.s</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>USB/Class/Audio</GroupName>
+          <Files>
+            <File>
+              <FileName>usbd_audio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>Middlewares\ST\STM32_USB_Device_Library\Class\AUDIO\Src\usbd_audio.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -923,40 +958,15 @@
                 </FileArmAds>
               </FileOption>
             </File>
-            <File>
-              <FileName>Image_rgb_888.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>jpeg_driver\Image_rgb_888.c</FilePath>
-            </File>
-            <File>
-              <FileName>encode_dma.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>jpeg_driver\encode_dma.c</FilePath>
-            </File>
-            <File>
-              <FileName>jpeg_driver.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>jpeg_driver\jpeg_driver.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>Applications/startup</GroupName>
+          <GroupName>USB/Class/Video</GroupName>
           <Files>
             <File>
-              <FileName>startup_stm32f767xx.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>MDK-ARM\startup_stm32f767xx.s</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>USB/Class/Audio</GroupName>
-          <Files>
-            <File>
-              <FileName>usbd_audio.c</FileName>
+              <FileName>usbd_video.c</FileName>
               <FileType>1</FileType>
-              <FilePath>Middlewares\ST\STM32_USB_Device_Library\Class\AUDIO\Src\usbd_audio.c</FilePath>
+              <FilePath>Middlewares\ST\STM32_USB_Device_Library\Class\VIDEO\Src\usbd_video.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1012,6 +1022,53 @@
               <FileName>usbd_audio_if.c</FileName>
               <FileType>1</FileType>
               <FilePath>Src\usbd_audio_if.c</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>0</RVCTCodeConst>
+                  <RVCTZI>0</RVCTZI>
+                  <RVCTOtherData>0</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>0</IncludeInBuild>
+                  <AlwaysBuild>2</AlwaysBuild>
+                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
+                  <PublicsOnly>2</PublicsOnly>
+                  <StopOnExitCode>11</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds>
+                  <Cads>
+                    <interw>2</interw>
+                    <Optim>0</Optim>
+                    <oTime>2</oTime>
+                    <SplitLS>2</SplitLS>
+                    <OneElfS>2</OneElfS>
+                    <Strict>2</Strict>
+                    <EnumInt>2</EnumInt>
+                    <PlainCh>2</PlainCh>
+                    <Ropi>2</Ropi>
+                    <Rwpi>2</Rwpi>
+                    <wLevel>2</wLevel>
+                    <uThumb>2</uThumb>
+                    <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <useXO>2</useXO>
+                    <v6Lang>0</v6Lang>
+                    <v6LangP>0</v6LangP>
+                    <vShortEn>0</vShortEn>
+                    <vShortWch>0</vShortWch>
+                    <VariousControls>
+                      <MiscControls></MiscControls>
+                      <Define></Define>
+                      <Undefine></Undefine>
+                      <IncludePath></IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
             </File>
             <File>
               <FileName>usbd_conf.c</FileName>
@@ -1022,6 +1079,11 @@
               <FileName>usbd_desc.c</FileName>
               <FileType>1</FileType>
               <FilePath>Src\usbd_desc.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_video_if.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>Src\usbd_video_if.c</FilePath>
             </File>
           </Files>
         </Group>

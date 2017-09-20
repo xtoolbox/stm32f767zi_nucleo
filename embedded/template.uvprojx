@@ -229,6 +229,7 @@
             <useUlib>1</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
+            <nSecure>0</nSecure>
             <RoSelD>3</RoSelD>
             <RwSelD>3</RwSelD>
             <CodeSel>0</CodeSel>
@@ -282,7 +283,7 @@
               <IRAM>
                 <Type>0</Type>
                 <StartAddress>0x20010000</StartAddress>
-                <Size>0x40000</Size>
+                <Size>0x60000</Size>
               </IRAM>
               <IROM>
                 <Type>1</Type>
@@ -365,6 +366,8 @@
             <useXO>0</useXO>
             <v6Lang>0</v6Lang>
             <v6LangP>0</v6LangP>
+            <vShortEn>0</vShortEn>
+            <vShortWch>0</vShortWch>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>

@@ -125,7 +125,7 @@ void HAL_JPEG_MspInit(JPEG_HandleTypeDef* hjpeg)
     __HAL_LINKDMA(hjpeg,hdmain,hdma_jpeg_in);
 
     /* JPEG interrupt Init */
-    HAL_NVIC_SetPriority(JPEG_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(JPEG_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(JPEG_IRQn);
   /* USER CODE BEGIN JPEG_MspInit 1 */
 

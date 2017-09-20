@@ -58,6 +58,7 @@
 #include <string.h>
 #include "stm32f7xx.h"
 #include "stm32f7xx_hal.h"
+#include <rtthread.h>
 
 /** @addtogroup USBD_OTG_DRIVER
   * @{
@@ -73,7 +74,7 @@
   */ 
 
 /*---------- -----------*/
-#define USBD_MAX_NUM_INTERFACES     1
+#define USBD_MAX_NUM_INTERFACES     3
 /*---------- -----------*/
 #define USBD_MAX_NUM_CONFIGURATION     1
 /*---------- -----------*/
@@ -87,20 +88,45 @@
 /*---------- -----------*/
 #define USBD_SELF_POWERED     1
 /*---------- -----------*/
-#define USBD_AUDIO_FREQ     22100
+#define USBD_VIDEO_FREQ     22100
 
 /****************************************/
 /* #define for FS and HS identification */
 #define DEVICE_FS 		0
 #define DEVICE_HS 		1
 
+
+#define WIDTH                                         320
+#define HEIGHT                                        240
+#define CAM_FPS                                       10
+#define VIDEO_PACKET_SIZE                             (512)//(130+128) // max 368 bytes
+#define VIDEO_XFER_SIZE                               (512) // we can modify the hal library to send mutilple ISO data packet
+
+#define VIDEO_EP_TYPE                                 USBD_EP_TYPE_ISOC
+#define VIEDO_EP_TYPE_DESC                            (USBD_EP_TYPE_ISOC | 0x00)
+
+#define VIDEO_BUFFER_SIZE                             1024*20
+#define CONTROL_PACKET_SIZE                           64
+#define MIN_BIT_RATE                                  (20*1024*CAM_FPS)
+#define MAX_BIT_RATE                                  (40*1024*CAM_FPS)
+#define MAX_FRAME_SIZE                                (20*1024)
+
+#define INTERVEL                                      (10000000ul/CAM_FPS)
+#define MAKE_WORD(x)                                  (uint8_t)((x)&0xFF),(uint8_t)(((x)>>8)&0xFF)
+#define MAKE_DWORD(x)                                 (uint8_t)((x)&0xFF),(uint8_t)(((x)>>8)&0xFF),(uint8_t)(((x)>>16)&0xFF),(uint8_t)(((x)>>24)&0xFF)
+
+
+#define USB_DESC_TYPE_ASSOCIATION               0x0B
+#define USB_DESC_TYPE_HID                       0x21
+
+
 /** @defgroup USBD_Exported_Macros
   * @{
   */ 
 
  /* Memory management macros */   
-#define USBD_malloc               malloc
-#define USBD_free                 free
+#define USBD_malloc               rt_malloc
+#define USBD_free                 rt_free
 #define USBD_memset               memset
 #define USBD_memcpy               memcpy
 
@@ -109,8 +135,8 @@
  /* DEBUG macros */  
 
 #if (USBD_DEBUG_LEVEL > 0)
-#define  USBD_UsrLog(...)   printf(__VA_ARGS__);\
-                            printf("\n");
+#define  USBD_UsrLog(...)   rt_kprintf(__VA_ARGS__);\
+                            rt_kprintf("\n");
 #else
 #define USBD_UsrLog(...)   
 #endif 
@@ -118,9 +144,9 @@
                             
 #if (USBD_DEBUG_LEVEL > 1)
 
-#define  USBD_ErrLog(...)   printf("ERROR: ") ;\
-                            printf(__VA_ARGS__);\
-                            printf("\n");
+#define  USBD_ErrLog(...)   rt_kprintf("ERROR: ") ;\
+                            rt_kprintf(__VA_ARGS__);\
+                            rt_kprintf("\n");
 #else
 #define USBD_ErrLog(...)   
 #endif 
