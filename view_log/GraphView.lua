@@ -10,7 +10,7 @@ function GraphView:__init(w,h)
     self.rH = h or 300
     self.lWidth = 60
     self.image = QImage(self.rW,self.rH,4)
-    self.lImage = QImage(60,self.rH,4)
+    self.lImage = QImage(self.lWidth,self.rH,4)
     self.btnLoad = QPushButton("Loa&d")
     self.scroll = QScrollArea()
     self.frame = QFrame(self)
@@ -21,11 +21,13 @@ function GraphView:__init(w,h)
 
     self.leftFrame.minW = self.lWidth
    
+    self.frame.cursor = QCursor(17)
+    
     self.layout = QVBoxLayout{
-      QHBoxLayout{ self.btnLoad, QLabel(""), stretch = "0,1"},
+      QHBoxLayout{ self.btnLoad, QLabel("   Use Ctrl + [Mouse Scroll] to Zoom in/Zoom out"), stretch = "0,1"},
       QHBoxLayout{ self.leftFrame , self.scroll,}
     }
-    self.rightPatiner = QPainter()
+    self.rightPatiner = QPainter()--self.image)
     self.rightPatiner:begin(self.image)
     self.rightPatiner:setPen(QColor("lightgray") )
     self.rightPatiner:setBrush(QBrush(QColor("lightgray")))
@@ -45,6 +47,36 @@ function GraphView:__init(w,h)
         pt:done()
     end
     )
+    self.frame.eventFilter = QMouseEvent.filter(
+    function(obj,evt)
+        --self.frame.cursor = QCursor(18)
+        if evt.type == 2  and evt.button == 1 then   -- left button press
+            self.mouse_drag = true
+            self.mouse_org_x = evt.x
+            self.offset_org_x = self.l_offset
+            self.frame.cursor = QCursor(18)
+        elseif evt.type == 3 and evt.button == 1  then -- left button release
+            self.mouse_drag = false
+            self.frame.cursor = QCursor(17)
+        elseif evt.type == 5 and self.mouse_drag then    -- mouse move
+            self.l_offset = self.offset_org_x + (evt.x - self.mouse_org_x)
+            --log(self.l_offset)
+            self:update_graph(self.objs)
+            self.frame:update()
+        end
+    end
+    )
+    
+    self.frame.eventFilter = QWheelEvent.filter(
+    function(obj, evt)
+        if evt.modifiers == 0x04000000 then
+        --log(evt.delta)
+        self:change_ratio(evt.delta, evt.x)
+        return true
+        end
+    end
+    )
+    
     self.leftFrame.eventFilter = QPaintEvent.filter(
     function(obj, evt)
         local pt = QPainter()
@@ -75,20 +107,19 @@ function GraphView:__init(w,h)
         else
         
         objs = {
-          { name = "test1" .. self.idx,
+          { name = "test1" .. self.idx, 
             {start = 1122, stop = 1124, desc = "xx1"},
             {start = 1190, stop = 1214, desc = "xx2"},
           },
-          { name = "test2" .. self.idx,
+          { name = "test2" .. self.idx, 
             {start = 1100, stop = 1114, desc = "xx1"},
             {start = 1130, stop = 1154, desc = "xx2"},
           },
-          { name = "test3" .. self.idx,
+          { name = "test3" .. self.idx, 
             {start = 1112, stop = 1124, desc = "xx1"},
-
             {start = 1250, stop = 1154, desc = "xx2"},
           },
-          { name = "test4" .. self.idx,
+          { name = "test4" .. self.idx, 
             {start = 1129, stop = 1179, desc = "xx1"},
             {start = 1254,              desc = "xx2"},
           },
@@ -97,6 +128,9 @@ function GraphView:__init(w,h)
         objs = generate_test_data()
         end
         prepocess(objs)
+        self.cur_ratio = nil
+        self.org_ratio = nil
+        self.l_offset = nil
         log(objs.min, objs.max)
         self:update_graph(objs)
         --self.objs = objs
@@ -115,6 +149,7 @@ function GraphView:__init(w,h)
       "pink",
     }
     self.l_offset = 10
+    self.h_offset = 10
     self.v_dist = 30
     self.v_offset = 40
     self.v_ratio = 0.4
@@ -134,7 +169,7 @@ function generate_test_data(ele_cnt, rec_cnt)
             obj[i].start = s1 + math.random(10,100)
             obj[i].stop = obj[i].start + math.random(100,300)
             obj[i].desc = "desc " .. i
-            s1 = s1 + math.random(300,1000)
+            s1 = s1 + math.random(1000,2000)
         end
         r[#r+1] = obj
     end
@@ -166,8 +201,53 @@ function prepocess(objs)
    end
 end
 
+function GraphView:change_ratio(dir,pos)
+    local ratio = (self.image.width-60)/(self.objs.max - self.objs.min)
+    self.org_ratio = self.org_ratio or ratio
+    self.cur_ratio = self.cur_ratio or self.org_ratio
+    local last_ratio = self.cur_ratio
+    if dir > 0 then
+        self.cur_ratio = self.cur_ratio * math.sqrt(2)
+    else
+        self.cur_ratio = self.cur_ratio / math.sqrt(2)
+    end
+    if self.cur_ratio < ratio/2 then
+        self.cur_ratio = ratio/2
+    end
+    if self.cur_ratio > ratio*50 then
+        self.cur_ratio = ratio*50
+    end
+    --local pos = self.scroll.horizontalScrollBar.value
+    --log(pos)
+    --self.l_offset = self.h_offset*(self.cur_ratio/self.org_ratio) + pos - pos*(self.cur_ratio/self.org_ratio)
+    --[[
+      off1 + r1 * x = p1
+      off2 + r2 * x = p2
+      here: p1 == p2
+      so we have: off2 = p1 - ((p1 - off1) * ( r2/r1))
+    --]]
+    last_ratio = self.cur_ratio  / last_ratio
+    self.l_offset = pos - (pos - self.l_offset)* last_ratio
+    
+    self:update_graph(self.objs)
+    self.frame:update()
+end
+
+function time_str(tick)
+    local t = tick / (216*1000)
+    if true then
+    --return string.format("%.1f %.1f", tick,t)
+    end
+    if t > 1 then
+        return string.format("%.1f ms", t)
+    end
+    t = tick / 216
+    return string.format("%.1f us", t)
+end
+
 function GraphView:update_graph(objs)
     if not objs then return end
+    self.objs = objs
     local p1 = self.leftPainter--QPainter(self.lImage)
     p1:setPen(QColor(self.backColor) )
     p1:setBrush(QBrush(QColor(self.backColor)))
@@ -184,20 +264,26 @@ function GraphView:update_graph(objs)
         vpos = vpos + self.v_dist
         --log(i, obj.name)
     end
-   
+    
+    self.l_offset = self.l_offset or self.h_offset
     local ratio = (self.image.width-60)/(objs.max - objs.min)
-    ratio = ratio
+    ratio = self.cur_ratio or ratio
+    local grid_size = self.grid_size or ((self.image.width-60)/20)
 
     local d = (objs.max - objs.min) / 20
     local text_pos = vpos
-    for i=0, 20 do
+    local grid_cnt = 20
+    d = grid_size / ratio
+    grid_cnt = math.ceil((objs.max - objs.min) / d)
+    --log("grid_cnt" , grid_cnt, d)
+    for i=0, grid_cnt do
         p2:setPen(QColor(self.lineColor) )
         p2:drawLine(self.l_offset + i*d*ratio, 0, self.l_offset + i*d*ratio, self.image.height)
         p2:setPen(QColor(self.textColor) )
-        p2:drawText(self.l_offset + i*d*ratio + 1, text_pos, string.format( "%.1f",(d*i)/(216*1000) ))
+        p2:drawText(self.l_offset + i*d*ratio + 1, text_pos, time_str((d*i)) )
         text_pos = text_pos == vpos and vpos+10 or vpos
     end
-   
+    
     vpos = self.v_offset
     for i=1,#objs do
         local obj = objs[i]
@@ -213,12 +299,12 @@ function GraphView:update_graph(objs)
                 p2:drawText( v.start*ratio+self.l_offset, vpos-self.v_dist*self.v_ratio, v.desc  )
             end
         end
-       
+        
         vpos = vpos + self.v_dist
         --log(i, obj.name)
     end
 
-   
+    
     --self.lImage:save("test.jpg")
     --self:update()
 end
