@@ -63,101 +63,8 @@
 /** @defgroup USBD_VIDEO_Private_Defines
   * @{
   */ 
-typedef struct 
-{
-	uint32_t start;
-	uint32_t stop;
-	uint32_t frm_idx;
-	uint32_t id;
-}debug_t;
 
-#define  DECLARE_DBG(name)\
-debug_t  name##_buffer[64];\
-uint32_t name##_index = 0;
-#define  INIT_DBG(name)\
-memset(name##_buffer,0,sizeof(name##_buffer));\
-name##_index = 0;
-#define  DBG_ENTER(name)\
-void dbg_enter_##name(void){\
-	USB_OTG_GlobalTypeDef *USBx = USB_OTG_FS;\
-	if(debug_enable && name##_index<64){\
-		name##_buffer[name##_index].start = DWT->CYCCNT;\
-		name##_buffer[name##_index].frm_idx = (USBx_DEVICE->DSTS & USB_OTG_DSTS_FNSOF_Msk) >> USB_OTG_DSTS_FNSOF_Pos;\
-		name##_buffer[name##_index].id = (USBx_INEP(1)->DIEPCTL & USB_OTG_DIEPCTL_EONUM_DPID) ? 1:0;\
-	}\
-}
-#define DBG_LEAVE(name)\
-void dbg_leave_##name(void){\
-	if(debug_enable && name##_index<64){\
-		name##_buffer[name##_index].stop = DWT->CYCCNT;\
-		\
-		name##_index++;\
-	}\
-}
 
-DECLARE_DBG(sof)
-DECLARE_DBG(xfer_done)
-DECLARE_DBG(otg_int)
-DECLARE_DBG(fifo_empty)
-DECLARE_DBG(fill_data)
-DECLARE_DBG(xfer_frame)
-
-uint32_t debug_enable = 0;
-
-void dbg_start(void){
-	debug_enable = 1;
-  INIT_DBG(sof)
-  INIT_DBG(xfer_done)
-  INIT_DBG(otg_int)
-  INIT_DBG(fifo_empty)
-  INIT_DBG(fill_data)
-  INIT_DBG(xfer_frame)
-}
-void dbg_stop(void){
-	debug_enable = 0;
-}
-  DBG_ENTER(sof)
-  DBG_ENTER(xfer_done)
-  DBG_ENTER(otg_int)
-  DBG_ENTER(fifo_empty)
-  DBG_ENTER(fill_data)
-  DBG_ENTER(xfer_frame)
-
-  DBG_LEAVE(sof)
-  DBG_LEAVE(xfer_done)
-  DBG_LEAVE(otg_int)
-  DBG_LEAVE(fifo_empty)
-  DBG_LEAVE(fill_data)
-  DBG_LEAVE(xfer_frame)
-
-#define  DBG_INFO(name,field)\
-do{\
-	rt_kprintf("   {  name = \"" #name "\", \n");\
-	for(i=0;i<name##_index;++i){\
-	rt_kprintf("      {start = 0x%x, stop = 0x%x, desc = \"%d\"}, \n", name##_buffer[i].start, name##_buffer[i].stop, name##_buffer[i].field);\
-  }\
-	rt_kprintf("   }, \n");\
-}while(0)
-
-void print_debug_info(void)
-{
-	uint32_t i;
-	rt_kprintf("{\n");
-	DBG_INFO(sof, frm_idx);
-	DBG_INFO(xfer_done, id);
-	DBG_INFO(otg_int, frm_idx);
-	DBG_INFO(xfer_frame, frm_idx);
-	DBG_INFO(fill_data, id);
-	//rt_kprintf("   {  name = \"sof\", \n");
-	//for(i=0;i<sof_index;++i){
-	//rt_kprintf("      {start = 0x%x, stop = 0x%x, desc = \"%d\"}, \n", sof_buffer[i].start, sof_buffer[i].stop, sof_buffer[i].frm_idx);
-  //}
-	//rt_kprintf("   }, \n");
-	
-	
-	
-	rt_kprintf("}\n");
-}
 /**
   * @}
   */ 
@@ -465,7 +372,9 @@ __ALIGN_BEGIN static const uint8_t VIDEO_ReportDescriptor[VIDEO_REPORT_DESC_SIZ]
 /** @defgroup USBD_VIDEO_Private_Functions
   * @{
   */ 
-
+// static allocate memory
+USBD_VIDEO_HandleTypeDef video_class_handle;
+	
 /**
   * @brief  USBD_VIDEO_Init
   *         Initialize the VIDEO interface
@@ -473,7 +382,6 @@ __ALIGN_BEGIN static const uint8_t VIDEO_ReportDescriptor[VIDEO_REPORT_DESC_SIZ]
   * @param  cfgidx: Configuration index
   * @retval status
   */
-USBD_VIDEO_HandleTypeDef video_class_handle;
 static uint8_t  USBD_VIDEO_Init (USBD_HandleTypeDef *pdev, 
                                uint8_t cfgidx)
 {
@@ -491,7 +399,7 @@ static uint8_t  USBD_VIDEO_Init (USBD_HandleTypeDef *pdev,
                  USBD_EP_TYPE_INTR,
                  CONTROL_PACKET_SIZE);
 	
-  /* Allocate Audio structure */
+  /* Allocate Video structure */
   pdev->pClassData = &video_class_handle;//USBD_malloc(sizeof (USBD_VIDEO_HandleTypeDef));
   
   if(pdev->pClassData == NULL)
@@ -549,7 +457,7 @@ static uint8_t  USBD_VIDEO_DeInit (USBD_HandleTypeDef *pdev,
   if(pdev->pClassData != NULL)
   {
    ((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->DeInit(0);
-    USBD_free(pdev->pClassData);
+    //USBD_free(pdev->pClassData);
     pdev->pClassData = NULL;
   }
   
@@ -812,7 +720,7 @@ static uint8_t  *USBD_VIDEO_GetCfgDesc (uint16_t *length)
 }
 
 
-
+extern uint32_t  camera_on;
 /**
   * @brief  USBD_VIDEO_DataIn
   *         handle data IN Stage
@@ -820,349 +728,6 @@ static uint8_t  *USBD_VIDEO_GetCfgDesc (uint16_t *length)
   * @param  epnum: endpoint index
   * @retval status
   */
-const uint8_t xxxx[] = {
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-	
-};
-
-
-/**** ISO transmit produre
-1. prepare buffer
-2. enable FIFO empty interrupt
-3. enalbe end point in sof interrupt, the packet will transfer at next frame
-4. fill FIFO in FIFO empty interrupt
-5. re-enable end point is tranfer complete interrupt
-6. 
-
- **************************/
-
-
-
-#define   VIDEO_IN_EP_NUM    (VIDEO_IN_EP & 0x7F)
-uint32_t new_data_ready = 0;
-
-HAL_StatusTypeDef PCD_WriteEmptyTxFifo(PCD_HandleTypeDef *hpcd, uint32_t epnum);
-void fast_ep1_in(PCD_HandleTypeDef *hpcd);
-static uint32_t xfer_last_len = 1;
-USBD_StatusTypeDef  USBD_ISO_Transmit_start (USBD_HandleTypeDef *pdev, 
-                                      uint8_t  *pbuf,
-                                      uint16_t  len)
-{
-	USB_OTG_EPTypeDef *ep;
-	USB_OTG_GlobalTypeDef *USBx = ((PCD_HandleTypeDef*)pdev->pData)->Instance;
-  ep = &((PCD_HandleTypeDef*)pdev->pData)->IN_ep[VIDEO_IN_EP & 0x7F];
-  
-  /*setup and start the Xfer */
-  ep->xfer_buff = pbuf;  
-  ep->xfer_len = len;
-  ep->xfer_count = 0;
-  ep->is_in = 1;
-  ep->num = VIDEO_IN_EP & 0x7F;	
-	xfer_last_len = 1;
-	new_data_ready = 1; // data send in SOF
-	//fast_ep1_in((PCD_HandleTypeDef*)pdev->pData);
-	return 0;
-	
-    if (1 || ep->xfer_len == 0)
-    {
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_PKTCNT); 
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ |= (USB_OTG_DIEPTSIZ_PKTCNT & (1 << 19)) ;
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_XFRSIZ); 
-			
-		  if ((USBx_DEVICE->DSTS & ( 1 << 8 )) == 0)
-      {
-        USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= USB_OTG_DIEPCTL_SODDFRM;
-      }
-      else
-      {
-        USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= USB_OTG_DIEPCTL_SD0PID_SEVNFRM;
-      }
-			
-			USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= (USB_OTG_DIEPCTL_CNAK | USB_OTG_DIEPCTL_EPENA);
-			xfer_last_len = 1;
-			return 0;
-    }
-    else
-    {
-      /* Program the transfer size and packet count
-      * as follows: xfersize = N * maxpacket +
-      * short_packet pktcnt = N + (short_packet
-      * exist ? 1 : 0)
-      */
-			//if(len > ep->maxpacket) len = ep->maxpacket;
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_XFRSIZ);
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_PKTCNT); 
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ |= (USB_OTG_DIEPTSIZ_PKTCNT & (((len + ep->maxpacket -1)/ ep->maxpacket) << 19)) ;
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ |= (USB_OTG_DIEPTSIZ_XFRSIZ & len); 
-      
-        USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_MULCNT); 
-        USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ |= (USB_OTG_DIEPTSIZ_MULCNT & (1 << 29)); 
-    }
-		
-		// enable the fifo
-		USBx_DEVICE->DIEPEMPMSK |= 1 << VIDEO_IN_EP_NUM;
-		
-		PCD_WriteEmptyTxFifo(((PCD_HandleTypeDef*)pdev->pData), VIDEO_IN_EP_NUM);
-		
-		//new_data_ready = 1; // start transfer in the SOF interrupt
-		return 0;
-}
-
-extern USBD_HandleTypeDef hUsbDeviceFS;
-void fast_ep1_in(PCD_HandleTypeDef *hpcd)
-{
-	USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;
-	USB_OTG_EPTypeDef *ep;
-	dbg_enter_xfer_done();
-  ep = &hpcd->IN_ep[VIDEO_IN_EP & 0x7F];
-	uint32_t len = ep->xfer_len - ep->xfer_count;
-	if (len > ep->maxpacket)
-	{
-		len = ep->maxpacket;
-	}
-			
-	if (len == 0)
-   {
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_PKTCNT); 
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ |= (USB_OTG_DIEPTSIZ_PKTCNT & (1 << 19)) ;
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_XFRSIZ); 
-		 if(xfer_last_len != ep->maxpacket){
-			//xfer_last_len = 0;
-		 }
-    }
-    else
-    {
-      /* Program the transfer size and packet count
-      * as follows: xfersize = N * maxpacket +
-      * short_packet pktcnt = N + (short_packet
-      * exist ? 1 : 0)
-      */
-			//if(len > ep->maxpacket) len = ep->maxpacket;
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_XFRSIZ);
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_PKTCNT); 
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ |= (USB_OTG_DIEPTSIZ_PKTCNT & (((len + ep->maxpacket -1)/ ep->maxpacket) << 19)) ;
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ |= (USB_OTG_DIEPTSIZ_XFRSIZ & len); 
-      
-        USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_MULCNT); 
-        USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ |= (USB_OTG_DIEPTSIZ_MULCNT & (1 << 29)); 
-    }
-		  if ((USBx_DEVICE->DSTS & ( 1 << 8 )) == 0)
-      {
-        USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= USB_OTG_DIEPCTL_SODDFRM;
-      }
-      else
-      {
-        USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= USB_OTG_DIEPCTL_SD0PID_SEVNFRM;
-      }
-
-			if(xfer_last_len > 0){
-				USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= (USB_OTG_DIEPCTL_CNAK | USB_OTG_DIEPCTL_EPENA);
-			}else{
-				dbg_leave_xfer_frame();
-				dbg_leave_xfer_done();
-				dbg_stop();
-				//((USBD_VIDEO_ItfTypeDef *)hUsbDeviceFS.pUserData)->FrameDone(); 
-			}
-			xfer_last_len = len;
-			
-	if(len > 0){
-		uint32_t len32b;
-		len32b = (len + 3) / 4;
-	 
-		if  ( (USBx_INEP(VIDEO_IN_EP_NUM)->DTXFSTS & USB_OTG_DTXFSTS_INEPTFSAV) < len32b)
-		{
-			while(1); // may not reach here
-		}
-		{ 
-			dbg_enter_fill_data();
-			USB_WritePacket(USBx, ep->xfer_buff, VIDEO_IN_EP_NUM, len, hpcd->Init.dma_enable); 
-			//USB_WritePacket(USBx, (uint8_t*)xxxx, VIDEO_IN_EP_NUM, len, hpcd->Init.dma_enable); 
-			dbg_leave_fill_data();
-			
-			ep->xfer_buff  += len;
-			ep->xfer_count += len;
-		}
-	}
-	dbg_leave_xfer_done();
-}
-
-void even_odd_toggle(PCD_HandleTypeDef *hpcd)
-{
-	USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;  
-	if ((USBx_DEVICE->DSTS & ( 1 << 8 )) == 0)
-		{
-			USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= USB_OTG_DIEPCTL_SODDFRM;
-		}
-		else
-      {
-        USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= USB_OTG_DIEPCTL_SD0PID_SEVNFRM;
-			}
-}
-
-USBD_StatusTypeDef  USBD_ISO_Transmit_sof (USBD_HandleTypeDef *pdev)
-{
-	USB_OTG_GlobalTypeDef *USBx = ((PCD_HandleTypeDef*)pdev->pData)->Instance;
-	if(new_data_ready){
-		
-		fast_ep1_in((PCD_HandleTypeDef*)pdev->pData);
-		/*
-		  if ((USBx_DEVICE->DSTS & ( 1 << 8 )) == 0)
-      {
-        USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= USB_OTG_DIEPCTL_SODDFRM;
-      }
-      else
-      {
-        USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= USB_OTG_DIEPCTL_SD0PID_SEVNFRM;
-      }
-			
-			
-		USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= (USB_OTG_DIEPCTL_CNAK | USB_OTG_DIEPCTL_EPENA);
-	  */
-		new_data_ready = 0;
-	}
-	return 0;
-}
-
-USBD_StatusTypeDef  USBD_ISO_Transmit_data_in (USBD_HandleTypeDef *pdev)
-{
-	// may be there is no need to toggle the odd/even bit
-	USB_OTG_EPTypeDef *ep;
-	USB_OTG_GlobalTypeDef *USBx = ((PCD_HandleTypeDef*)pdev->pData)->Instance;
-	uint32_t len;
-  ep = &((PCD_HandleTypeDef*)pdev->pData)->IN_ep[VIDEO_IN_EP & 0x7F];
-	if(ep->xfer_count >= ep->xfer_len){
-		// transfer complete
-		return 0;
-	}
-	len = ep->xfer_len - ep->xfer_count;
-	if (len > ep->maxpacket)
-  {
-    len = ep->maxpacket;
-  }
-	USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_XFRSIZ);
-	USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_PKTCNT); 
-	USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ |= (USB_OTG_DIEPTSIZ_PKTCNT & (((len + ep->maxpacket -1)/ ep->maxpacket) << 19)) ;
-	USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ |= (USB_OTG_DIEPTSIZ_XFRSIZ & len); 
-      
-	USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_MULCNT); 
-	USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ |= (USB_OTG_DIEPTSIZ_MULCNT & (1 << 29)); 
-	
-	
-	if ((USBx_DEVICE->DSTS & ( 1 << 8 )) == 0)
-  {
-    USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= USB_OTG_DIEPCTL_SODDFRM;
-  }
-  else
-  {
-    USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= USB_OTG_DIEPCTL_SD0PID_SEVNFRM;
-  }
-	USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= (USB_OTG_DIEPCTL_CNAK | USB_OTG_DIEPCTL_EPENA);
-	return 0;
-}
-
-
-
-USBD_StatusTypeDef  USBD_FAST_Transmit (USBD_HandleTypeDef *pdev, 
-                                      uint8_t  *pbuf,
-                                      uint16_t  len)
-{
-	USB_OTG_EPTypeDef *ep;
-	USB_OTG_GlobalTypeDef *USBx = ((PCD_HandleTypeDef*)pdev->pData)->Instance;
-  ep = &((PCD_HandleTypeDef*)pdev->pData)->IN_ep[VIDEO_IN_EP & 0x7F];
-  
-  /*setup and start the Xfer */
-  ep->xfer_buff = pbuf;  
-  ep->xfer_len = len;
-  ep->xfer_count = 0;
-  ep->is_in = 1;
-  ep->num = VIDEO_IN_EP & 0x7F;	
-	
-  
-  
-  /* IN endpoint */
-  if (ep->is_in == 1)
-  {
-    /* Zero Length Packet? */
-    if (ep->xfer_len == 0)
-    {
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_PKTCNT); 
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ |= (USB_OTG_DIEPTSIZ_PKTCNT & (1 << 19)) ;
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_XFRSIZ); 
-    }
-    else
-    {
-      /* Program the transfer size and packet count
-      * as follows: xfersize = N * maxpacket +
-      * short_packet pktcnt = N + (short_packet
-      * exist ? 1 : 0)
-      */
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_XFRSIZ);
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_PKTCNT); 
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ |= (USB_OTG_DIEPTSIZ_PKTCNT & (((ep->xfer_len + ep->maxpacket -1)/ ep->maxpacket) << 19)) ;
-      USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ |= (USB_OTG_DIEPTSIZ_XFRSIZ & ep->xfer_len); 
-      
-        USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ &= ~(USB_OTG_DIEPTSIZ_MULCNT); 
-        USBx_INEP(VIDEO_IN_EP_NUM)->DIEPTSIZ |= (USB_OTG_DIEPTSIZ_MULCNT & (1 << 29)); 
-    }
-
-		// prepare packet for next frame, so if this frame is odd, next will be even
-		  if ((USBx_DEVICE->DSTS & ( 1 << 8 )) == 0)
-      {
-        USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= USB_OTG_DIEPCTL_SODDFRM;
-      }
-      else
-      {
-        USBx_INEP(VIDEO_IN_EP_NUM)->DIEPCTL |= USB_OTG_DIEPCTL_SD0PID_SEVNFRM;
-      }
-    
-    /* EP enable, IN data in FIFO */
-		//USBx_DEVICE->DIEPEMPMSK |= 1 << VIDEO_IN_EP_NUM;
-    USBx_INEP(ep->num)->DIEPCTL |= (USB_OTG_DIEPCTL_CNAK | USB_OTG_DIEPCTL_EPENA);
-    USB_WritePacket(USBx, ep->xfer_buff, ep->num, ep->xfer_len, 0);     
-  }
-	return 0;
-}
-
-
-extern uint32_t  camera_on;
 static uint8_t  USBD_VIDEO_DataIn (USBD_HandleTypeDef *pdev, 
                               uint8_t epnum)
 {
@@ -1177,7 +742,7 @@ static uint8_t  USBD_VIDEO_DataIn (USBD_HandleTypeDef *pdev,
 			uint32_t len = hvideo->total_length - hvideo->current_length;
 			if(len > VIDEO_PACKET_SIZE) len = VIDEO_PACKET_SIZE;
 
-			USBD_FAST_Transmit(pdev, hvideo->video_buffer+hvideo->current_length, len);
+			USBD_LL_Transmit(pdev, VIDEO_IN_EP, hvideo->video_buffer+hvideo->current_length, len);
 			hvideo->current_length += len;
 
 		}else if(hvideo->current_length >= hvideo->total_length){
@@ -1185,17 +750,12 @@ static uint8_t  USBD_VIDEO_DataIn (USBD_HandleTypeDef *pdev,
 				last_len = 0;
 				// zero length data
 				//USBD_LL_Transmit(pdev, VIDEO_IN_EP, hvideo->video_buffer, 0);
-				USBD_FAST_Transmit(pdev, hvideo->video_buffer, 0);
+				USBD_LL_Transmit(pdev, VIDEO_IN_EP, hvideo->video_buffer, 0);
 				//hvideo->current_length = 0;
 				
 			}else{
 				((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->FrameDone(); 
 			}
-			// TODO: shall we send a zero length packet???
-			//USBD_LL_Transmit(pdev, VIDEO_IN_EP, hviedo->video_buffer, 0);
-			// video transfer complete
-			
-			
 		}
 	}else{
 		// there only video input ep, reach here means something wrong
@@ -1203,8 +763,7 @@ static uint8_t  USBD_VIDEO_DataIn (USBD_HandleTypeDef *pdev,
 	}
   return USBD_OK;
 }
-
-uint32_t xfer_length = 13840;
+static uint32_t new_data_ready = 0;
 int8_t  VIDEO_Start_Transmit_Video(USBD_HandleTypeDef *pdev, uint32_t length)
 {
 	USBD_VIDEO_HandleTypeDef   *hvideo;
