@@ -66,7 +66,7 @@ typedef struct
 #endif
 
 #define CHUNK_SIZE_IN   ((uint32_t)(MAX_INPUT_WIDTH * BYTES_PER_PIXEL * MAX_INPUT_LINES)) 
-#define CHUNK_SIZE_OUT  ((uint32_t) (4096))
+#define CHUNK_SIZE_OUT  ((uint32_t) (4096*10))
 
 #define JPEG_BUFFER_EMPTY       0
 #define JPEG_BUFFER_FULL        1
@@ -76,10 +76,10 @@ typedef struct
 JPEG_RGBToYCbCr_Convert_Function pRGBToYCbCr_Convert_Function;
 
 uint8_t MCU_Data_IntBuffer0[CHUNK_SIZE_IN];
-uint8_t MCU_Data_InBuffer1[CHUNK_SIZE_IN];
+//uint8_t MCU_Data_InBuffer1[CHUNK_SIZE_IN];
 
 uint8_t JPEG_Data_OutBuffer0[CHUNK_SIZE_OUT];
-uint8_t JPEG_Data_OutBuffer1[CHUNK_SIZE_OUT];
+//uint8_t JPEG_Data_OutBuffer1[CHUNK_SIZE_OUT];
 
 JPEG_Data_BufferTypeDef Jpeg_OUT_BufferTab = {JPEG_BUFFER_EMPTY , JPEG_Data_OutBuffer0 , 0};
 

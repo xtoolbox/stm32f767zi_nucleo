@@ -73,13 +73,13 @@ uint8_t*  show_addr = 0;
 uint32_t  show_length = 0;
 uint32_t  camera_on = 0;
 
-static void show_data(void)
+void show_data(void)
 {
 	uint32_t len = show_length;
 	uint8_t* pos = show_addr;
 	uint32_t i = 0;
 	if(len <= 0) len = 16;
-	if(len > 1024*20) len = 1024*20;
+	if(len > 1024*200) len = 1024*200;
 	for(i=0;i<len;++i){
 		rt_kprintf("%02x ", *pos);
 		pos++;
@@ -90,10 +90,11 @@ static void show_data(void)
 }
 
 int8_t  VIDEO_Start_Transmit_Video(USBD_HandleTypeDef *pdev, uint32_t length);
-
+uint32_t get_usb_lcd_address(void);
 static void jpeg_main(void *parameter)
 {
   uint32_t JpegEncodeProcessing_End = 0;
+	uint32_t duration;
 	rt_uint32_t mb_value = 0;
   
 #if (JPEG_RGB_FORMAT == JPEG_ARGB8888)
@@ -106,6 +107,9 @@ static void jpeg_main(void *parameter)
   RGB_ImageAddress = (uint32_t)IMAGE_ADDRESS;//Image_RGB565;
   
 #endif /* JPEG_RGB_FORMAT */
+	
+	
+	RGB_ImageAddress = get_usb_lcd_address();
 	
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 	DWT->CYCCNT = 0;
@@ -132,12 +136,14 @@ static void jpeg_main(void *parameter)
 				jout.data = jpeg_data;
 				jout.current_length = 0;
 				jout.total_length = sizeof(jpeg_data);
+			  duration = DWT->CYCCNT;
 				JPEG_Encode_DMA(&hjpeg, RGB_ImageAddress, RGB_IMAGE_HEIGHT * RGB_IMAGE_WIDTH *2, &jout);
 				do{
 					JPEG_EncodeInputHandler(&hjpeg);
 					JpegEncodeProcessing_End = JPEG_EncodeOutputHandler(&hjpeg);
 				}while(JpegEncodeProcessing_End == 0);
-				rt_kprintf("encode done %d (%x)\n", jout.current_length, jout.current_length);
+				duration = (DWT->CYCCNT - duration) / 216;
+				rt_kprintf("encode done %d (%x), cost %d us\n", jout.current_length, jout.current_length, duration);
 				
 				if(camera_on){
 					VIDEO_Send_Video(&hUsbDeviceFS, jout.data, jout.current_length);
@@ -222,9 +228,9 @@ long jpeg(void)
 long jpeg_src_mem(int start, int len)
 {
 	//int i = 0;
-	uint8_t* pos = (uint8_t*)(IMAGE_ADDRESS) + start;
+	uint8_t* pos = (uint8_t*)(get_usb_lcd_address()) + start;
 	if(len <= 0) len = 16;
-	if(len > 1024*20) len = 1024*20;
+	if(len > 1024*200) len = 1024*200;
 	show_addr = pos;
 	show_length = len;
 	rt_mb_send(jpeg_mb, JPEG_SHOW_SRC);

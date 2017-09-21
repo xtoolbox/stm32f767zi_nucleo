@@ -339,7 +339,7 @@
               <OCR_RVCT9>
                 <Type>0</Type>
                 <StartAddress>0x20010000</StartAddress>
-                <Size>0x40000</Size>
+                <Size>0x70000</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
@@ -435,6 +435,11 @@
               <FileName>drv_usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>board_driver\drv_usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>drv_usb_lcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\board_driver\drv_usb_lcd.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1084,6 +1089,11 @@
               <FileName>usbd_video_if.c</FileName>
               <FileType>1</FileType>
               <FilePath>Src\usbd_video_if.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtgui_demo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\rtgui_demo.c</FilePath>
             </File>
           </Files>
         </Group>
