@@ -6,7 +6,7 @@
 #include <rtgui/rtgui_system.h>
 
 static uint16_t  usb_lcd_mem_buffer[WIDTH*HEIGHT];
-
+extern int update_image(int color);
 uint32_t get_usb_lcd_address(void)
 {
 	return (uint32_t)usb_lcd_mem_buffer;
@@ -46,9 +46,10 @@ static rt_err_t lcd_control(rt_device_t dev, rt_uint8_t cmd, void *args)
 	}
 	break;
 
-	case RTGRAPHIC_CTRL_RECT_UPDATE:
-		/* nothong to be done */
-		break;
+        case RTGRAPHIC_CTRL_RECT_UPDATE:
+            /* nothong to be done */
+            update_image(1);
+            break;
 
 	default:
 		return RT_ERROR;
@@ -94,7 +95,7 @@ static void usb_lcd_blit_line(const char* pixels, int x, int y, rt_size_t size)
 }
 
 
-static int rt_usb_lcd_init(void)
+int rt_usb_lcd_init(void)
 {
 	//_lcd_low_level_init();
 	memset(usb_lcd_mem_buffer, 0xff, sizeof(usb_lcd_mem_buffer));
