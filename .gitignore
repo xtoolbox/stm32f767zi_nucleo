@@ -36,3 +36,5 @@ limage
 no_rtt
 xtool
 *.pack
+*.user
+*-build-desktop
