@@ -12,6 +12,9 @@ public:
     void run();
 };
 
+
+extern "C" void mouse_action(int x, int y, int btn, int is_down);
+
 class QMyLabel : public QLabel
 {
 public:
@@ -32,10 +35,12 @@ public:
    }
    void mousePressEvent(QMouseEvent* evt){
        PRINT_EVT("MouseDown ");
+       mouse_action(evt->x(), evt->y(), evt->button(), 1);
        QLabel::mousePressEvent(evt);
    }
    void mouseReleaseEvent(QMouseEvent* evt){
        PRINT_EVT("MouseUp   ");
+       mouse_action(evt->x(), evt->y(), evt->button(), 0);
        QLabel::mouseReleaseEvent(evt);
    }
    void keyPressEvent(QKeyEvent* evt){

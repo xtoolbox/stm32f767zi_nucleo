@@ -10,12 +10,12 @@ CPPPATH = [cwd]
 # remove no need file.
 if True:
     SrcRemove(src, 'sdl_fb.c')
-    gb = Glob('H:/work/stm32f767zi_nucleo/embedded/board_driver/drv_usb_lcd.c')
+    gb = Split('''
+    ../../../embedded/board_driver/drv_usb_lcd.c
+    ../../../embedded/Src/rtgui_demo.c
+    ''')
     for e in gb:
-        src.append(e)
-    gb = Glob('H:/work/stm32f767zi_nucleo/embedded/Src/rtgui_demo.c')
-    for e in gb:
-        src.append(e)
+        src.append(File(e))
 else:
     LIBS.append('SDL')
     if sys.platform == 'win32':
