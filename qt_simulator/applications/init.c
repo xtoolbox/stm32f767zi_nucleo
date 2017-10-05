@@ -155,6 +155,7 @@ void components_init(void)
 #endif
 
 #ifdef RT_USING_RTGUI
+        rt_usb_lcd_init();
 	rtgui_system_server_init();
 #endif
 
