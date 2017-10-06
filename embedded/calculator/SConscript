@@ -1,0 +1,13 @@
+from building import *
+
+cwd = GetCurrentDir()
+src = Split("""
+lcdwidget.c
+image_mem.c
+calculator.c
+calc_button_resource.c
+""")
+CPPPATH = [cwd]
+group = DefineGroup('calculator', src, depend = [''], CPPPATH = CPPPATH)
+
+Return('group')

@@ -49,9 +49,11 @@
 #include "main.h"
 #include "stm32f7xx_hal.h"
 #include "usb_device.h"
-
 /* USER CODE BEGIN Includes */
 #include <rtthread.h>
+#include "math.h"
+#include "stdlib.h"
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/

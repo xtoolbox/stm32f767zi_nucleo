@@ -1,5 +1,6 @@
 #include "drv_usb_lcd.h"
 #include "rtthread.h"
+#include <rtgui/event.h>
 #include <rtgui/rtgui.h>
 #include <rtgui/driver.h>
 #include <rtgui/rtgui_server.h>
@@ -128,5 +129,32 @@ int rt_usb_lcd_init(void)
 
 	return 0;
 }
+
+void mouse_action(int x, int y, int btn, int is_down)
+{
+    struct rtgui_event_mouse emouse ;
+    emouse.parent.type = RTGUI_EVENT_MOUSE_BUTTON;
+    emouse.parent.sender = RT_NULL;
+
+    emouse.id = 1;
+    emouse.x = x ;
+    emouse.y = y ;
+    emouse.button = is_down?RTGUI_MOUSE_BUTTON_DOWN:RTGUI_MOUSE_BUTTON_UP;
+    emouse.button |= (btn & 7);
+    /* init mouse button */
+    rtgui_server_post_event(&emouse.parent, sizeof(struct rtgui_event_mouse));
+}
+
+void key_action(int btn, int mod, int is_press)
+{
+    struct rtgui_event_kbd key ;
+    key.parent.type = RTGUI_EVENT_KBD;
+    key.parent.sender = RT_NULL;
+    key.key = btn;
+    key.type = is_press ? RTGUI_KEYDOWN : RTGUI_KEYUP;
+    key.mod = mod;
+    rtgui_server_post_event(&key.parent, sizeof(struct rtgui_event_kbd));
+}
+
 INIT_BOARD_EXPORT(rt_usb_lcd_init);
 

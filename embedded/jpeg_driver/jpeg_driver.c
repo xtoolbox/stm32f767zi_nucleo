@@ -177,6 +177,11 @@ static void jpeg_main(void *parameter)
   /* Infinite loop */
 }
 
+void update_image(int v)
+{
+	(void)v;
+}
+
 /**
   * @brief  Get the images sizes from BMP header.
   * @param  pInfo : pointer to the Info structure

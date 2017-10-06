@@ -105,7 +105,7 @@
 #define VIDEO_EP_TYPE                                 USBD_EP_TYPE_ISOC
 #define VIEDO_EP_TYPE_DESC                            (USBD_EP_TYPE_ISOC | 0x00)
 
-#define VIDEO_BUFFER_SIZE                             1024*20
+#define VIDEO_BUFFER_SIZE                             1024*30
 #define CONTROL_PACKET_SIZE                           64
 #define MIN_BIT_RATE                                  (20*1024*CAM_FPS)
 #define MAX_BIT_RATE                                  (40*1024*CAM_FPS)

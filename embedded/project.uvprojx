@@ -338,12 +338,12 @@
               </OCR_RVCT8>
               <OCR_RVCT9>
                 <Type>0</Type>
-                <StartAddress>0x20010000</StartAddress>
-                <Size>0x70000</Size>
+                <StartAddress>0x20000000</StartAddress>
+                <Size>0x80000</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
-                <StartAddress>0x20000000</StartAddress>
+                <StartAddress>0x20080000</StartAddress>
                 <Size>0x10000</Size>
               </OCR_RVCT10>
             </OnChipMemories>
@@ -373,7 +373,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F767xx, USE_HAL_DRIVER, RT_USING_ARM_LIBC</Define>
               <Undefine></Undefine>
-              <IncludePath>board_driver;Inc;drivers\CMSIS\Device\ST\STM32F7xx\Include;drivers\CMSIS\Include;drivers\STM32F7xx_HAL_Driver\Inc;jpeg_driver;Middlewares\ST\STM32_USB_Device_Library\Class\AUDIO\Inc;Middlewares\ST\STM32_USB_Device_Library\Class\VIDEO\Inc;Middlewares\ST\STM32_USB_Device_Library\Core\Inc;Src;.;Utilities\JPEG;..\..\rt-thread\include;..\..\rt-thread\libcpu\arm\cortex-m7;..\..\rt-thread\libcpu\arm\common;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\spi;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\finsh;..\..\rt-thread\components\gui\include;..\..\rt-thread\components\libc\armlibc;..\..\rt-thread\components\libc\pthreads</IncludePath>
+              <IncludePath>board_driver;Inc;calculator;drivers\CMSIS\Device\ST\STM32F7xx\Include;drivers\CMSIS\Include;drivers\STM32F7xx_HAL_Driver\Inc;jpeg_driver;Middlewares\ST\STM32_USB_Device_Library\Class\AUDIO\Inc;Middlewares\ST\STM32_USB_Device_Library\Class\VIDEO\Inc;Middlewares\ST\STM32_USB_Device_Library\Core\Inc;Src;.;Utilities\JPEG;..\..\rt-thread\include;..\..\rt-thread\libcpu\arm\cortex-m7;..\..\rt-thread\libcpu\arm\common;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\spi;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\drivers\include;..\..\rt-thread\components\finsh;..\..\rt-thread\components\gui\include;..\..\rt-thread\components\libc\armlibc;..\..\rt-thread\components\libc\pthreads</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -439,7 +439,32 @@
             <File>
               <FileName>drv_usb_lcd.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\board_driver\drv_usb_lcd.c</FilePath>
+              <FilePath>board_driver\drv_usb_lcd.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>calculator</GroupName>
+          <Files>
+            <File>
+              <FileName>lcdwidget.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>calculator\lcdwidget.c</FilePath>
+            </File>
+            <File>
+              <FileName>image_mem.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>calculator\image_mem.c</FilePath>
+            </File>
+            <File>
+              <FileName>calculator.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>calculator\calculator.c</FilePath>
+            </File>
+            <File>
+              <FileName>calc_button_resource.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>calculator\calc_button_resource.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1004,6 +1029,58 @@
               <FilePath>Src\main.c</FilePath>
             </File>
             <File>
+              <FileName>rtgui_demo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>Src\rtgui_demo.c</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>0</RVCTCodeConst>
+                  <RVCTZI>0</RVCTZI>
+                  <RVCTOtherData>0</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>0</IncludeInBuild>
+                  <AlwaysBuild>2</AlwaysBuild>
+                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
+                  <PublicsOnly>2</PublicsOnly>
+                  <StopOnExitCode>11</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds>
+                  <Cads>
+                    <interw>2</interw>
+                    <Optim>0</Optim>
+                    <oTime>2</oTime>
+                    <SplitLS>2</SplitLS>
+                    <OneElfS>2</OneElfS>
+                    <Strict>2</Strict>
+                    <EnumInt>2</EnumInt>
+                    <PlainCh>2</PlainCh>
+                    <Ropi>2</Ropi>
+                    <Rwpi>2</Rwpi>
+                    <wLevel>2</wLevel>
+                    <uThumb>2</uThumb>
+                    <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <useXO>2</useXO>
+                    <v6Lang>0</v6Lang>
+                    <v6LangP>0</v6LangP>
+                    <vShortEn>0</vShortEn>
+                    <vShortWch>0</vShortWch>
+                    <VariousControls>
+                      <MiscControls></MiscControls>
+                      <Define></Define>
+                      <Undefine></Undefine>
+                      <IncludePath></IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+            <File>
               <FileName>stm32f7xx_hal_msp.c</FileName>
               <FileType>1</FileType>
               <FilePath>Src\stm32f7xx_hal_msp.c</FilePath>
@@ -1089,11 +1166,6 @@
               <FileName>usbd_video_if.c</FileName>
               <FileType>1</FileType>
               <FilePath>Src\usbd_video_if.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtgui_demo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\rtgui_demo.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1569,6 +1641,156 @@
               <FileName>window.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\rt-thread\components\gui\src\window.c</FilePath>
+            </File>
+            <File>
+              <FileName>button.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\button.c</FilePath>
+            </File>
+            <File>
+              <FileName>caret.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\caret.c</FilePath>
+            </File>
+            <File>
+              <FileName>checkbox.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\checkbox.c</FilePath>
+            </File>
+            <File>
+              <FileName>combobox.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\combobox.c</FilePath>
+            </File>
+            <File>
+              <FileName>digfont.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\digfont.c</FilePath>
+            </File>
+            <File>
+              <FileName>digtube.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\digtube.c</FilePath>
+            </File>
+            <File>
+              <FileName>edit.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\edit.c</FilePath>
+            </File>
+            <File>
+              <FileName>filelist_view.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\filelist_view.c</FilePath>
+            </File>
+            <File>
+              <FileName>groupbox.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\groupbox.c</FilePath>
+            </File>
+            <File>
+              <FileName>iconbox.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\iconbox.c</FilePath>
+            </File>
+            <File>
+              <FileName>label.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\label.c</FilePath>
+            </File>
+            <File>
+              <FileName>list_view.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\list_view.c</FilePath>
+            </File>
+            <File>
+              <FileName>listbox.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\listbox.c</FilePath>
+            </File>
+            <File>
+              <FileName>listctrl.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\listctrl.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\menu.c</FilePath>
+            </File>
+            <File>
+              <FileName>mv_view.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\mv_view.c</FilePath>
+            </File>
+            <File>
+              <FileName>plot.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\plot.c</FilePath>
+            </File>
+            <File>
+              <FileName>plot_curve.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\plot_curve.c</FilePath>
+            </File>
+            <File>
+              <FileName>progressbar.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\progressbar.c</FilePath>
+            </File>
+            <File>
+              <FileName>radiobox.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\radiobox.c</FilePath>
+            </File>
+            <File>
+              <FileName>scrollbar.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\scrollbar.c</FilePath>
+            </File>
+            <File>
+              <FileName>slider.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\slider.c</FilePath>
+            </File>
+            <File>
+              <FileName>staticline.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\staticline.c</FilePath>
+            </File>
+            <File>
+              <FileName>textbox.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\textbox.c</FilePath>
+            </File>
+            <File>
+              <FileName>textview.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\textview.c</FilePath>
+            </File>
+            <File>
+              <FileName>panel.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\panel.c</FilePath>
+            </File>
+            <File>
+              <FileName>notebook.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\widgets\notebook.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtgui_theme.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\src\rtgui_theme.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtgui_mv_model.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\src\rtgui_mv_model.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtgui_xml.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\rt-thread\components\gui\src\rtgui_xml.c</FilePath>
             </File>
           </Files>
         </Group>
