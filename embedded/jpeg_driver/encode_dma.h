@@ -51,6 +51,12 @@ typedef struct{
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
+uint32_t  JPEG_ConvertRGB_to_YUV(JPEG_HandleTypeDef *hjpeg, uint32_t RGBImageBufferAddress, uint32_t RGBImageSize_Bytes, jpeg_dest_t *jpgfile);
+uint32_t  JPEG_Init(JPEG_HandleTypeDef *hjpeg);
+uint32_t  JPEG_Start_DMA(JPEG_HandleTypeDef *hjpeg);
+// this is a callback function
+uint32_t  JPEG_On_DMA_Done(JPEG_HandleTypeDef *hjpeg);
+
 uint32_t JPEG_Encode_DMA(JPEG_HandleTypeDef *hjpeg, uint32_t RGBImageBufferAddress, uint32_t RGBImageSize_Bytes, jpeg_dest_t *jpgfile);
 uint32_t JPEG_EncodeOutputHandler(JPEG_HandleTypeDef *hjpeg);
 void JPEG_EncodeInputHandler(JPEG_HandleTypeDef *hjpeg);

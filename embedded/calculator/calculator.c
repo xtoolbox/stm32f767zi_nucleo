@@ -9,7 +9,9 @@
 #include "image_mem.h"
 #include "math.h"
 #include "string.h"
+#include "stdio.h"
 #include "calculator.h"
+#include "finsh.h"
 
 struct rtgui_win *main_win;
 struct rtgui_lcdwidget* lcdwidget;
@@ -194,10 +196,7 @@ static int calc_process_input(calc_state_t* s, int val)
 static int calc_process_display(calc_state_t* s)
 {
     char res[32] = "";
-    char digi[MAX_DIGI_CNT] = {0};
     int pt_pos = 0;
-    int digi_cnt = 0;
-    char* pt;
     char* ps = res;
     int memory = 0;
     int neg = 0;
@@ -224,6 +223,7 @@ static int calc_process_display(calc_state_t* s)
     rtgui_lcdwidget_set_number(lcdwidget, ps, neg, memory, s->is_error);
     rtgui_widget_update(RTGUI_WIDGET(main_win));
     //rt_kprintf("%s  %s %s\n", res, s->is_error?"error":"succ", memory?"M": "");
+		return 0;
 }
 
 static rt_bool_t calc_handle_key(struct rtgui_object *object, struct rtgui_event *event)
@@ -253,8 +253,6 @@ static void application_entry(void *parameter)
     struct rtgui_app *app;
     struct rtgui_rect rect;
     rt_device_t device;
-    rtgui_button_t *button;
-
 
     device = rt_device_find("lcd");
     /* re-set graphic device */
@@ -322,3 +320,15 @@ int calc_application_init(void)
 		return 0;
 }
 INIT_APP_EXPORT(calc_application_init);
+
+
+long calc(int v)
+{
+	v = calc_process_input(&state, v);
+	if(v){
+		calc_process_display(&state);
+	}
+	return v;
+}
+
+FINSH_FUNCTION_EXPORT(calc, manul input calc event);

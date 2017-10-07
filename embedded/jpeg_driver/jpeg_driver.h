@@ -65,6 +65,7 @@
 #define   JPEG_CAMERA_OFF 6
 #define   JPEG_CONTROL    7
 #define   JPEG_FRAME_DONE 8
+#define   JPEG_ENCODE_DONE 9
 
 
 extern rt_mailbox_t  jpeg_mb;

@@ -190,11 +190,29 @@ typedef struct
 }
 USBD_VIDEO_HandleTypeDef; 
 
-typedef struct
-{
+#define  CT_MOUSE  0
+#define  CT_KEY    1
+typedef struct{
 	uint32_t x;
 	uint32_t y;
 	uint32_t button;
+	uint32_t is_press;
+}mouse_data_t;
+
+typedef struct{
+	uint32_t key;
+	uint32_t modifier;
+	uint32_t padding;
+	uint32_t is_press;
+}key_data_t;
+
+typedef struct
+{
+	uint32_t type;  // 0 mouse, 1 keyboard
+	union{
+		mouse_data_t mouse;
+		key_data_t key;
+	}data;
 }control_t;
 
 typedef struct
