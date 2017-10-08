@@ -1,18 +1,7 @@
-#include <QApplication>
-#include <QMainWindow>
-#include <QFontDialog>
 #include <QtGui>
-#include <QThread>
-#include <QDialog>
 #include "qusbhid.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include <rtthread.h>
 #include <rtgui/kbddef.h>
-#ifdef __cplusplus
-}
-#endif
 #include <opencv2/opencv.hpp>
 int translate_qt_key_to_rt(int key)
 {
@@ -46,31 +35,18 @@ typedef struct{
 
 typedef struct
 {
-        uint32_t type;  // 0 mouse, 1 keyboard
-        union{
-                mouse_data_t mouse;
-                key_data_t key;
-        }data;
+    uint32_t type;  // 0 mouse, 1 keyboard
+    union{
+        mouse_data_t mouse;
+        key_data_t key;
+    }data;
 }control_t;
 
 
 class QMyMainWindow : public QMainWindow
 {
 public:
-    QMyMainWindow():myLabel(0){
-        QList<QUsbHidInfo> list = QUsbHid::enumDevices(0x0483, 0x5740);
-        if(list.size()>0){
-            mHid.setPath(list.at(0).path);
-            mHid.setQueryMode(QUsbHid::Polling);
-            mHid.open(QUsbHid::ReadWrite);
-        }else{
-            info("Hid device not found!\r\nInput simulation not work!");
-        }
-        mCapId = 0;
-        mCap = 0;
-        open_camera();
-        startTimer(50);
-    }
+    QMyMainWindow();
     ~QMyMainWindow(){
         mHid.close();
     }
@@ -97,7 +73,9 @@ public:
         setWindowTitle(cam_name);
     }
     void keyPressEvent(QKeyEvent* evt){
-        key_action(translate_qt_key_to_rt(evt->key()), (int)evt->modifiers(), 1);
+        if(evt->key() != Qt::Key_PageUp && evt->key() != Qt::Key_PageDown){
+            key_action(translate_qt_key_to_rt(evt->key()), (int)evt->modifiers(), 1);
+        }
         QMainWindow::keyPressEvent(evt);
     }
     void keyReleaseEvent(QKeyEvent* evt){
@@ -112,7 +90,7 @@ public:
             if(mCapId>5)mCapId = 0;
             new_camera = true;
         }
-        if(new_camera = true){
+        if(new_camera){
             if(mCap){
                 cvReleaseCapture(&mCap);
                 mCap = 0;
@@ -182,16 +160,30 @@ public:
    QMyMainWindow& mMainWindow;
 };
 
+QMyMainWindow::QMyMainWindow()
+{
+    QList<QUsbHidInfo> list = QUsbHid::enumDevices(0x0483, 0x5740);
+    if(list.size()>0){
+        mHid.setPath(list.at(0).path);
+        mHid.open(QUsbHid::ReadWrite);
+    }else{
+        info("Hid device not found!\r\nInput simulation not work!");
+    }
+    myLabel = new QMyLabel(*this);
+    myLabel->setPixmap(QPixmap::fromImage(QImage(320, 240, QImage::Format_RGB888)));
+    mCapId = 0;
+    mCap = 0;
+    open_camera();
+    startTimer(50);
+    setCentralWidget(myLabel);
+}
+
 int main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
     QMyMainWindow w;
-    QMyLabel* label = new QMyLabel(w);
-    label->setPixmap(QPixmap::fromImage(QImage(320, 240, QImage::Format_RGB888)));
-    w.setCentralWidget(label);
     w.show();
-    a.exec();
-    return 0;
+    return a.exec();
 }
 
 
