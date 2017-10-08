@@ -18,7 +18,7 @@ class MyThread : public QThread
 public:
     MyThread():ready(0){}
     void run();
-    int ready;
+    volatile int ready;
 };
 extern "C" void mouse_action(int x, int y, int btn, int is_down);
 extern "C" void key_action(int btn, int mod, int is_press);
@@ -121,9 +121,9 @@ void MyThread::run()
     QMyLabel* label = new QMyLabel();
     label->setPixmap(QPixmap::fromImage(QImage(320,240, QImage::Format_RGB16)));
     glabel = label;
+    ready = 1;
     w.setCentralWidget(label);
     w.show();
-    ready = 1;
     a.exec();
     glabel = 0;
 }
