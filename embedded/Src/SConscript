@@ -1,9 +1,30 @@
 from building import *
 
 cwd = GetCurrentDir()
-src = Glob('*.c')
+src = Split('''
+main.c
+stm32f7xx_hal_msp.c
+stm32f7xx_it.c
+system_stm32f7xx.c
+usb_device.c
+usbd_conf.c
+usbd_desc.c
+''')
+
+video_src = Split('''
+usbd_video_if.c
+''')
+audio_src = Split('''
+usbd_audio_if.c
+''')
 
 CPPPATH = [cwd, str(Dir('#'))]
+
+if GetDepend('RT_USBD_AUDIO'):
+    src = src + audio_src
+        
+if GetDepend('RT_USBD_VIDEO'):
+    src = src + video_src
 
 group = DefineGroup('Applications/src', src, depend = [''], CPPPATH = CPPPATH)
 

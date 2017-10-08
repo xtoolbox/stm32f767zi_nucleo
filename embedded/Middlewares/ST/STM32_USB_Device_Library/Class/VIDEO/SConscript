@@ -5,6 +5,6 @@ src = Glob('Src/usbd_video.c')
 
 path = [cwd + '/Inc']
 
-group = DefineGroup('USB/Class/Video', src, depend = [''], CPPPATH = path)
+group = DefineGroup('USB/Class/Video', src, depend = ['RT_USBD_VIDEO'], CPPPATH = path)
 
 Return('group')

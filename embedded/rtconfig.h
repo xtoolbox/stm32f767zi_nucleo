@@ -252,4 +252,6 @@
 
 
 #define RT_MAIN_THREAD_STACK_SIZE 4096
+
+#define RT_USBD_VIDEO
 #endif

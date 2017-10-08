@@ -15,6 +15,6 @@ for t in srcx:
 path = [cwd + '/Inc']
 
 #CPPDEFINES = ['USE_HAL_DRIVER', rtconfig.STM32_TYPE]
-group = DefineGroup('USB/Class/Audio', src, depend = [''], CPPPATH = path)
+group = DefineGroup('USB/Class/Audio', src, depend = ['RT_USBD_AUDIO'], CPPPATH = path)
 
 Return('group')

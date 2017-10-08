@@ -183,7 +183,7 @@ uint32_t  JPEG_ConvertRGB_to_YUV(JPEG_HandleTypeDef *hjpeg, uint32_t RGBImageBuf
 }
 
 
-#include "rgb565_to_yuv_table.c"
+#include "rgb565_to_yuv_table.c.tab"
 
 void RGB565_to_YUV420(const uint16_t* in, uint8_t* out)
 {
