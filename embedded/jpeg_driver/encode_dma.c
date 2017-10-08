@@ -117,7 +117,10 @@ uint32_t  JPEG_Init(JPEG_HandleTypeDef *hjpeg)
 
 uint32_t  JPEG_Start_DMA(JPEG_HandleTypeDef *hjpeg)
 {
-	HAL_JPEG_Encode_DMA(hjpeg ,Jpeg_IN_BufferTab.DataBuffer ,Jpeg_IN_BufferTab.DataBufferSize ,Jpeg_OUT_BufferTab.DataBuffer ,CHUNK_SIZE_OUT);
+	// I don't known why the DMA not work well, so I use a polling method
+	//HAL_JPEG_Encode_DMA(hjpeg ,Jpeg_IN_BufferTab.DataBuffer ,Jpeg_IN_BufferTab.DataBufferSize ,Jpeg_OUT_BufferTab.DataBuffer ,CHUNK_SIZE_OUT);
+	HAL_JPEG_Encode(hjpeg, Jpeg_IN_BufferTab.DataBuffer, Jpeg_IN_BufferTab.DataBufferSize, Jpeg_OUT_BufferTab.DataBuffer, sizeof(JPEG_Data_OutBuffer0), 0xffff);
+	//HAL_JPEG_EncodeCpltCallback(hjpeg);
 	return 0;
 }
 #define  YUV420_MCU_SIZE    (64*4+64+64)  // 4Y + 1U + 1V
@@ -164,6 +167,7 @@ uint32_t  JPEG_ConvertRGB_to_YUV(JPEG_HandleTypeDef *hjpeg, uint32_t RGBImageBuf
 	
 	MCU_TotalNb = MCN_CNT;
 	RGB565_to_YUV420((const uint16_t*)RGB_InputImageAddress, Jpeg_IN_BufferTab.DataBuffer);
+	
 
   if(RGB_InputImageIndex < RGB_InputImageSize_Bytes)
   {

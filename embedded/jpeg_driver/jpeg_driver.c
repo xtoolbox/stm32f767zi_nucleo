@@ -42,6 +42,7 @@
 #include <rtthread.h>
 #include "finsh.h"
 #include "usbd_video.h"
+#include <rtgui/rtgui_system.h>
 /** @addtogroup STM32F7xx_HAL_Examples
   * @{
   */
@@ -99,7 +100,7 @@ static void jpeg_main(void *parameter)
   uint32_t JpegEncodeProcessing_End = 0;
 	uint32_t duration;
 	rt_uint32_t mb_value = 0;
- 
+	
 	RGB_ImageAddress = get_usb_lcd_address();
 	
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
@@ -125,7 +126,7 @@ static void jpeg_main(void *parameter)
 				show_data();
 				break;
 			case JPEG_ENCODE:
-				rt_kprintf("start encode \n");
+				//rt_kprintf("start encode \n");
 				jout.data = jpeg_data;
 				jout.current_length = 0;
 				jout.total_length = sizeof(jpeg_data);
@@ -147,20 +148,20 @@ static void jpeg_main(void *parameter)
 				rt_kprintf("start decode not implemnet\n");
 				break;
 			case JPEG_CAMERA_ON:
-				rt_kprintf("camera on\n");
+				//rt_kprintf("camera on\n");
 				camera_on = 1;
 			  rt_mb_send(jpeg_mb, JPEG_FRAME_DONE);
 				break;
 			case JPEG_CAMERA_OFF:
-				rt_kprintf("camera off\n");
+				//rt_kprintf("camera off\n");
 				camera_on = 0;
 				break;
 			case JPEG_CONTROL:
 				if(jpeg_control.type == CT_MOUSE){
-					rt_kprintf("Mouse x:%d, y:%d, btn:%x, down %d\n", jpeg_control.data.mouse.x, jpeg_control.data.mouse.y, jpeg_control.data.mouse.button, jpeg_control.data.mouse.is_press);
+					//rt_kprintf("Mouse x:%d, y:%d, btn:%x, down %d\n", jpeg_control.data.mouse.x, jpeg_control.data.mouse.y, jpeg_control.data.mouse.button, jpeg_control.data.mouse.is_press);
 					mouse_action(jpeg_control.data.mouse.x, jpeg_control.data.mouse.y, jpeg_control.data.mouse.button, jpeg_control.data.mouse.is_press);
 				}else if(jpeg_control.type == CT_KEY){
-					rt_kprintf("Key %d, Mod:%x, down %d\n", jpeg_control.data.key.key, jpeg_control.data.key.modifier, jpeg_control.data.key.is_press);
+					//rt_kprintf("Key %d, Mod:%x, down %d\n", jpeg_control.data.key.key, jpeg_control.data.key.modifier, jpeg_control.data.key.is_press);
 					key_action(jpeg_control.data.key.key, jpeg_control.data.key.modifier, jpeg_control.data.key.is_press);
 				}
 				break;
@@ -172,8 +173,14 @@ static void jpeg_main(void *parameter)
 				break;
 		  case JPEG_ENCODE_DONE:
 				duration = (DWT->CYCCNT - duration) / 216;
-				rt_kprintf("encode done %d (%x), cost %d us\n", jout.current_length, jout.current_length, duration);
+				//rt_kprintf("encode done %d (%x), cost %d us\n", jout.current_length, jout.current_length, duration);
 				break;
+			case JPEG_NEED_UPDATE:
+				rtgui_screen_lock(1000);
+			  JPEG_ConvertRGB_to_YUV(&hjpeg, get_usb_lcd_address(), RGB_IMAGE_HEIGHT * RGB_IMAGE_WIDTH *2, &jout);
+				rtgui_screen_unlock();
+			  rt_mb_send(jpeg_mb, JPEG_ENCODE);
+			  break;
 		}
 		
 		//rt_thread_delay(RT_TICK_PER_SECOND/2);
@@ -190,15 +197,16 @@ uint32_t  JPEG_On_DMA_Done(JPEG_HandleTypeDef *hjpeg)
 void update_image(int v)
 {
 	(void)v;
-	uint32_t duration;
+	//uint32_t duration;
 	// convert RGB565 to YUV420 format
-	duration = DWT->CYCCNT;
-	JPEG_ConvertRGB_to_YUV(&hjpeg, get_usb_lcd_address(), RGB_IMAGE_HEIGHT * RGB_IMAGE_WIDTH *2, &jout);
-	duration = (DWT->CYCCNT - duration) / 216;
-	rt_kprintf("RGB to YUV done, cost %d us\n", duration);
-	if(v){
-		rt_mb_send(jpeg_mb, JPEG_ENCODE);
-	}
+	//duration = DWT->CYCCNT;
+	//JPEG_ConvertRGB_to_YUV(&hjpeg, get_usb_lcd_address(), RGB_IMAGE_HEIGHT * RGB_IMAGE_WIDTH *2, &jout);
+	//duration = (DWT->CYCCNT - duration) / 216;
+	//rt_kprintf("RGB to YUV done, cost %d us, chk %x\n", duration, chk);
+	//if(v){
+	//	rt_mb_send(jpeg_mb, JPEG_ENCODE);
+	//}
+	rt_mb_send(jpeg_mb, JPEG_NEED_UPDATE);
 }
 
 int jpeg_update(void)

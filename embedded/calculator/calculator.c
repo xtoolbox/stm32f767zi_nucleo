@@ -22,7 +22,7 @@ typedef struct calc_state{
     calc_value_t cur_val; // current value, maybe threat as current input or calc result
     rt_uint8_t is_error;         // is error occur
     rt_uint8_t input_count;      // input digital count
-    rt_uint8_t input_divider;    // input digital divider with
+    rt_uint32_t input_divider;    // input digital divider with
     rt_uint8_t last_oper;
 }calc_state_t;
 
@@ -132,6 +132,9 @@ static int calc_process_input(calc_state_t* s, int val)
             s->input_divider = s->input_divider*10;
         }else{
             s->cur_val = s->cur_val*10 + val;
+					  if(s->cur_val<1 && val == 0){
+							s->input_count--;
+						}
         }
         return 1;
     case DOT:
