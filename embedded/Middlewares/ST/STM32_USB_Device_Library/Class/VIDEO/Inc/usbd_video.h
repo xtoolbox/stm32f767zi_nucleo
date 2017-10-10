@@ -170,59 +170,59 @@ typedef struct
   uint16_t                   rd_ptr;  
   uint16_t                   wr_ptr;  
   USBD_VIDEO_ControlTypeDef control;
-	
-	// video related fields
-	uint32_t                  video_interface_changed;
-	uint32_t                  video_alt_setting;
-	uint32_t                  total_length;
-	uint32_t                  current_length;
-	uint8_t                   video_frame_id;
-	uint8_t                   video_buffer[VIDEO_BUFFER_SIZE]; // this buffer may used by the jpeg engine
-	
-	// hid related fields
+  
+  // video related fields
+  uint32_t                  video_interface_changed;
+  uint32_t                  video_alt_setting;
+  uint32_t                  total_length;
+  uint32_t                  current_length;
+  uint8_t                   video_frame_id;
+  uint8_t                   video_buffer[VIDEO_BUFFER_SIZE]; // this buffer may used by the jpeg engine
+  
+  // hid related fields
   uint8_t              Report_buf[CONTROL_PACKET_SIZE];
   uint32_t             Protocol;   
   uint32_t             IdleState;  
   uint32_t             hid_alt_setting;
   uint32_t             IsReportAvailable; 
-	uint8_t              control_buffer[CONTROL_PACKET_SIZE];
-	
+  uint8_t              control_buffer[CONTROL_PACKET_SIZE];
+  
 }
 USBD_VIDEO_HandleTypeDef; 
 
 #define  CT_MOUSE  0
 #define  CT_KEY    1
 typedef struct{
-	uint32_t x;
-	uint32_t y;
-	uint32_t button;
-	uint32_t is_press;
+  uint32_t x;
+  uint32_t y;
+  uint32_t button;
+  uint32_t is_press;
 }mouse_data_t;
 
 typedef struct{
-	uint32_t key;
-	uint32_t modifier;
-	uint32_t padding;
-	uint32_t is_press;
+  uint32_t key;
+  uint32_t modifier;
+  uint32_t padding;
+  uint32_t is_press;
 }key_data_t;
 
 typedef struct
 {
-	uint32_t type;  // 0 mouse, 1 keyboard
-	union{
-		mouse_data_t mouse;
-		key_data_t key;
-	}data;
+  uint32_t type;  // 0 mouse, 1 keyboard
+  union{
+    mouse_data_t mouse;
+    key_data_t key;
+  }data;
 }control_t;
 
 typedef struct
 {
     int8_t  (*Init)         (uint32_t  AudioFreq, uint32_t Volume, uint32_t options);
     int8_t  (*DeInit)       (uint32_t options);
-	  int8_t  (*ControlEvent) (control_t* ctrl);
-	  int8_t  (*CameraOn)     (void);
-		int8_t  (*CameraOff)    (void);
-	  int8_t  (*FrameDone)    (void);
+    int8_t  (*ControlEvent) (control_t* ctrl);
+    int8_t  (*CameraOn)     (void);
+    int8_t  (*CameraOff)    (void);
+    int8_t  (*FrameDone)    (void);
 }USBD_VIDEO_ItfTypeDef;
 /**
   * @}
