@@ -29,15 +29,15 @@
 
 static void led_thread_entry(void *parameter)
 {
-    while (1)
-    {
-		//GPIOB->BSRR = LD2_Pin;
-		GPIOB->BSRR = LD3_Pin<<16;
-        rt_thread_delay(RT_TICK_PER_SECOND/2);
-		//GPIOB->BSRR = LD2_Pin<<16;
-		GPIOB->BSRR = LD3_Pin;
-        rt_thread_delay(RT_TICK_PER_SECOND/2);
-    }
+  while (1)
+  {
+    //GPIOB->BSRR = LD2_Pin;
+    GPIOB->BSRR = LD3_Pin<<16;
+    rt_thread_delay(RT_TICK_PER_SECOND/2);
+    //GPIOB->BSRR = LD2_Pin<<16;
+    GPIOB->BSRR = LD3_Pin;
+    rt_thread_delay(RT_TICK_PER_SECOND/2);
+  }
 }
 
 int led_hw_init(void)

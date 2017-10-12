@@ -333,7 +333,7 @@ __ALIGN_BEGIN static const uint8_t USBD_VIDEO_CfgDesc[USB_VIDEO_CONFIG_DESC_SIZ]
     CONTROL_PACKET_SIZE,          /*wMaxPacketSize: 4 Byte max */
     0x00,
     0x01,          /*bInterval: Polling Interval (32 ms)*/
-		/* 7 bytes, total size 169 */
+    /* 7 bytes, total size 169 */
 };
 
 /* USB Standard Device Descriptor */
@@ -364,7 +364,7 @@ __ALIGN_BEGIN static const uint8_t VIDEO_ReportDescriptor[VIDEO_REPORT_DESC_SIZ]
     0x91, 0x02,                    //   OUTPUT (Data,Var,Abs)
     0xc0,                          // END_COLLECTION
   }; /* Keyboard_ReportDescriptor */
-	
+  
 /**
   * @}
   */ 
@@ -374,7 +374,7 @@ __ALIGN_BEGIN static const uint8_t VIDEO_ReportDescriptor[VIDEO_REPORT_DESC_SIZ]
   */ 
 // static allocate memory
 USBD_VIDEO_HandleTypeDef video_class_handle;
-	
+  
 /**
   * @brief  USBD_VIDEO_Init
   *         Initialize the VIDEO interface
@@ -386,19 +386,19 @@ static uint8_t  USBD_VIDEO_Init (USBD_HandleTypeDef *pdev,
                                uint8_t cfgidx)
 {
   USBD_VIDEO_HandleTypeDef   *hvideo;
-	USB_OTG_GlobalTypeDef *USBx = USB_OTG_FS;
+  USB_OTG_GlobalTypeDef *USBx = USB_OTG_FS;
   
   /* Open EP OUT */
   USBD_LL_OpenEP(pdev,
                  VIDEO_IN_EP,
                  VIDEO_EP_TYPE,
                  VIDEO_PACKET_SIZE);
-	
-	USBD_LL_OpenEP(pdev,
+  
+  USBD_LL_OpenEP(pdev,
                  CONTROL_OUT_EP,
                  USBD_EP_TYPE_INTR,
                  CONTROL_PACKET_SIZE);
-	
+  
   /* Allocate Video structure */
   pdev->pClassData = &video_class_handle;//USBD_malloc(sizeof (USBD_VIDEO_HandleTypeDef));
   
@@ -414,12 +414,12 @@ static uint8_t  USBD_VIDEO_Init (USBD_HandleTypeDef *pdev,
     hvideo->wr_ptr = 0; 
     hvideo->rd_ptr = 0;  
     hvideo->rd_enable = 0;
-		// payload header, must toggle every frame
-		hvideo->video_interface_changed = 0;
-		hvideo->video_alt_setting = 0;
-		hvideo->current_length = 0;
-		hvideo->total_length = 0;
-		hvideo->video_frame_id = 0x00;
+    // payload header, must toggle every frame
+    hvideo->video_interface_changed = 0;
+    hvideo->video_alt_setting = 0;
+    hvideo->current_length = 0;
+    hvideo->total_length = 0;
+    hvideo->video_frame_id = 0x00;
     
     /* Initialize the Audio output Hardware layer */
     if (((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->Init(USBD_VIDEO_FREQ, VIDEO_DEFAULT_VOLUME, 0) != USBD_OK)
@@ -450,7 +450,7 @@ static uint8_t  USBD_VIDEO_DeInit (USBD_HandleTypeDef *pdev,
   /* Open EP OUT */
   USBD_LL_CloseEP(pdev,
               VIDEO_IN_EP);
-	USBD_LL_CloseEP(pdev,
+  USBD_LL_CloseEP(pdev,
               CONTROL_OUT_EP);
 
   /* DeInit  physical Interface components */
@@ -541,86 +541,86 @@ static uint8_t  USBD_VIDEO_Setup (USBD_HandleTypeDef *pdev,
   uint16_t len;
   uint8_t *pbuf;
   uint8_t ret = USBD_OK;
-	uint8_t interface = req->wIndex & 0xff;
+  uint8_t interface = req->wIndex & 0xff;
   hvideo = (USBD_VIDEO_HandleTypeDef*) pdev->pClassData;
   
   switch (req->bmRequest & USB_REQ_TYPE_MASK)
   {
   case USB_REQ_TYPE_CLASS :  
-	  if(interface == 2 ){
-			// the hid interace 
-			switch (req->bRequest)
-			{
-			case VIDEO_HID_REQ_SET_PROTOCOL:
-				hvideo->Protocol = (uint8_t)(req->wValue);
-				break;
-				
-			case VIDEO_HID_REQ_GET_PROTOCOL:
-				USBD_CtlSendData (pdev, 
-													(uint8_t *)&hvideo->Protocol,
-													1);    
-				break;
-				
-			case VIDEO_HID_REQ_SET_IDLE:
-				hvideo->IdleState = (uint8_t)(req->wValue >> 8);
-				break;
-				
-			case VIDEO_HID_REQ_GET_IDLE:
-				USBD_CtlSendData (pdev, 
-													(uint8_t *)&hvideo->IdleState,
-													1);        
-				break;      
-			
-			case VIDEO_HID_REQ_SET_REPORT:
-				hvideo->IsReportAvailable = 1;
-				USBD_CtlPrepareRx (pdev, hvideo->Report_buf, (uint8_t)(req->wLength));
-				
-				break;
-			default:
-				USBD_CtlError (pdev, req);
-				return USBD_FAIL; 
-			}
-			break;
-		}
-	  // otherwise video request
+    if(interface == 2 ){
+      // the hid interace 
+      switch (req->bRequest)
+      {
+      case VIDEO_HID_REQ_SET_PROTOCOL:
+        hvideo->Protocol = (uint8_t)(req->wValue);
+        break;
+        
+      case VIDEO_HID_REQ_GET_PROTOCOL:
+        USBD_CtlSendData (pdev, 
+                          (uint8_t *)&hvideo->Protocol,
+                          1);    
+        break;
+        
+      case VIDEO_HID_REQ_SET_IDLE:
+        hvideo->IdleState = (uint8_t)(req->wValue >> 8);
+        break;
+        
+      case VIDEO_HID_REQ_GET_IDLE:
+        USBD_CtlSendData (pdev, 
+                          (uint8_t *)&hvideo->IdleState,
+                          1);        
+        break;      
+      
+      case VIDEO_HID_REQ_SET_REPORT:
+        hvideo->IsReportAvailable = 1;
+        USBD_CtlPrepareRx (pdev, hvideo->Report_buf, (uint8_t)(req->wLength));
+        
+        break;
+      default:
+        USBD_CtlError (pdev, req);
+        return USBD_FAIL; 
+      }
+      break;
+    }
+    // otherwise video request
     switch (req->bRequest)
     {
     case VIDEO_REQ_GET_CUR:
-	  case VIDEO_REQ_GET_MIN:
-	  case VIDEO_REQ_GET_MAX:
-			if(interface == 1){
-				if(req->wValue == 0x0100){
-					USBD_CtlSendData (pdev, 
+    case VIDEO_REQ_GET_MIN:
+    case VIDEO_REQ_GET_MAX:
+      if(interface == 1){
+        if(req->wValue == 0x0100){
+          USBD_CtlSendData (pdev, 
                     (uint8_t*)&videoProbeControl,
                     req->wLength);
-				}else if(req->wValue == 0x0200){
-					USBD_CtlSendData (pdev, 
+        }else if(req->wValue == 0x0200){
+          USBD_CtlSendData (pdev, 
                     (uint8_t*)&videoCommitControl,
                     req->wLength);
-				}
-				break;
-			}
-			// if interface not 1, will fall in next branch
+        }
+        break;
+      }
+      // if interface not 1, will fall in next branch
       //VIDEO_REQ_GetCurrent(pdev, req);
       //break;
       
     case VIDEO_REQ_SET_CUR:
-			if(1){
-				if(req->wValue == 0x0100){
-					  if (req->wLength){
-							USBD_CtlPrepareRx (pdev,
+      if(1){
+        if(req->wValue == 0x0100){
+            if (req->wLength){
+              USBD_CtlPrepareRx (pdev,
                        (uint8_t*)&videoProbeControl,                             
                        req->wLength);
-						}
-				}else if(req->wValue == 0x0200){
-					  if (req->wLength){
-							USBD_CtlPrepareRx (pdev,
+            }
+        }else if(req->wValue == 0x0200){
+            if (req->wLength){
+              USBD_CtlPrepareRx (pdev,
                        (uint8_t*)&videoCommitControl,                             
                        req->wLength);
-						}
-				}
-				break;
-			}
+            }
+        }
+        break;
+      }
       //VIDEO_REQ_SetCurrent(pdev, req);   
       //break;
       
@@ -634,23 +634,23 @@ static uint8_t  USBD_VIDEO_Setup (USBD_HandleTypeDef *pdev,
     switch (req->bRequest)
     {
     case USB_REQ_GET_DESCRIPTOR:
-		  if(interface == 2){
-				if( (req->wValue >> 8) == VIDEO_HID_REPORT_DESC){
-					pbuf = (uint8_t*)VIDEO_ReportDescriptor;
-					len = MIN(VIDEO_REPORT_DESC_SIZ , req->wLength);
-					USBD_CtlSendData (pdev, 
-														pbuf,
-														len);
-					break;
-				}else if( (req->wValue >> 8) == VIDEO_HID_DESCRIPTOR_TYPE){
-					pbuf = (uint8_t*)USBD_VIDEO_CfgDesc + USB_VIDEO_HID_DESC_OFFSET;
-					len = MIN(9 , req->wLength);
-					USBD_CtlSendData (pdev,
-														pbuf,
-														len);
-					break;
-				}
-			}
+      if(interface == 2){
+        if( (req->wValue >> 8) == VIDEO_HID_REPORT_DESC){
+          pbuf = (uint8_t*)VIDEO_ReportDescriptor;
+          len = MIN(VIDEO_REPORT_DESC_SIZ , req->wLength);
+          USBD_CtlSendData (pdev, 
+                            pbuf,
+                            len);
+          break;
+        }else if( (req->wValue >> 8) == VIDEO_HID_DESCRIPTOR_TYPE){
+          pbuf = (uint8_t*)USBD_VIDEO_CfgDesc + USB_VIDEO_HID_DESC_OFFSET;
+          len = MIN(9 , req->wLength);
+          USBD_CtlSendData (pdev,
+                            pbuf,
+                            len);
+          break;
+        }
+      }
       if( (req->wValue >> 8) == VIDEO_DESCRIPTOR_TYPE)
       {
         pbuf = (uint8_t*)USBD_VIDEO_CfgDesc + 18;
@@ -664,31 +664,31 @@ static uint8_t  USBD_VIDEO_Setup (USBD_HandleTypeDef *pdev,
       break;
       
     case USB_REQ_GET_INTERFACE :
-			if(interface == 2){
-				USBD_CtlSendData (pdev,
+      if(interface == 2){
+        USBD_CtlSendData (pdev,
                         (uint8_t *)&(hvideo->hid_alt_setting),
                         1);
-			}else{
-				USBD_CtlSendData (pdev,
+      }else{
+        USBD_CtlSendData (pdev,
                         (uint8_t *)&(hvideo->video_alt_setting),
                         1);
-			}
+      }
       break;
       
     case USB_REQ_SET_INTERFACE :
       if ((uint8_t)(req->wValue) <= USBD_MAX_NUM_INTERFACES)
       {
-				if(interface == 2){
-					hvideo->hid_alt_setting = (uint8_t)(req->wValue);
-				}else{
-					hvideo->video_alt_setting = (uint8_t)(req->wValue);
-					//hvideo->video_interface_changed = 1;
-					if(hvideo->video_alt_setting){
-						((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->CameraOn(); 
-					}else{
-						((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->CameraOff(); 
-					}
-				}
+        if(interface == 2){
+          hvideo->hid_alt_setting = (uint8_t)(req->wValue);
+        }else{
+          hvideo->video_alt_setting = (uint8_t)(req->wValue);
+          //hvideo->video_interface_changed = 1;
+          if(hvideo->video_alt_setting){
+            ((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->CameraOn(); 
+          }else{
+            ((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->CameraOff(); 
+          }
+        }
       }
       else
       {
@@ -732,86 +732,86 @@ static uint8_t  USBD_VIDEO_DataIn (USBD_HandleTypeDef *pdev,
                               uint8_t epnum)
 {
 
-	static uint32_t last_len = 0;
-	//USBD_ISO_Transmit_data_in(pdev);
+  static uint32_t last_len = 0;
+  //USBD_ISO_Transmit_data_in(pdev);
   /* Only OUT data are processed */
-	USBD_VIDEO_HandleTypeDef   *hvideo;
+  USBD_VIDEO_HandleTypeDef   *hvideo;
   hvideo = (USBD_VIDEO_HandleTypeDef*) pdev->pClassData;
-	if((epnum & 0x7f) == (VIDEO_IN_EP & 0x7f) && camera_on ){
-		if(hvideo->current_length < hvideo->total_length){
-			uint32_t len = hvideo->total_length - hvideo->current_length;
-			if(len > VIDEO_PACKET_SIZE) len = VIDEO_PACKET_SIZE;
+  if((epnum & 0x7f) == (VIDEO_IN_EP & 0x7f) && camera_on ){
+    if(hvideo->current_length < hvideo->total_length){
+      uint32_t len = hvideo->total_length - hvideo->current_length;
+      if(len > VIDEO_PACKET_SIZE) len = VIDEO_PACKET_SIZE;
 
-			USBD_LL_Transmit(pdev, VIDEO_IN_EP, hvideo->video_buffer+hvideo->current_length, len);
-			hvideo->current_length += len;
+      USBD_LL_Transmit(pdev, VIDEO_IN_EP, hvideo->video_buffer+hvideo->current_length, len);
+      hvideo->current_length += len;
 
-		}else if(hvideo->current_length >= hvideo->total_length){
-			if(last_len){
-				last_len = 0;
-				// zero length data
-				//USBD_LL_Transmit(pdev, VIDEO_IN_EP, hvideo->video_buffer, 0);
-				USBD_LL_Transmit(pdev, VIDEO_IN_EP, hvideo->video_buffer, 0);
-				//hvideo->current_length = 0;
-				
-			}else{
-				((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->FrameDone(); 
-			}
-		}
-	}else{
-		// there only video input ep, reach here means something wrong
-		// while(1);
-	}
+    }else if(hvideo->current_length >= hvideo->total_length){
+      if(last_len){
+        last_len = 0;
+        // zero length data
+        //USBD_LL_Transmit(pdev, VIDEO_IN_EP, hvideo->video_buffer, 0);
+        USBD_LL_Transmit(pdev, VIDEO_IN_EP, hvideo->video_buffer, 0);
+        //hvideo->current_length = 0;
+        
+      }else{
+        ((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->FrameDone(); 
+      }
+    }
+  }else{
+    // there only video input ep, reach here means something wrong
+    // while(1);
+  }
   return USBD_OK;
 }
 static uint32_t new_data_ready = 0;
 int8_t  VIDEO_Start_Transmit_Video(USBD_HandleTypeDef *pdev, uint32_t length)
 {
-	USBD_VIDEO_HandleTypeDef   *hvideo;
+  USBD_VIDEO_HandleTypeDef   *hvideo;
   hvideo = (USBD_VIDEO_HandleTypeDef*) pdev->pClassData;
-	if(length > VIDEO_BUFFER_SIZE){
-		return -1;
-	}
-	hvideo->total_length = length;
-	hvideo->current_length = 0;
-	// toggle the payload header
-	hvideo->video_frame_id ^= 0x01;
-	USBD_LL_FlushEP(pdev, VIDEO_IN_EP);
-	new_data_ready = 1;
-	return 0;
+  if(length > VIDEO_BUFFER_SIZE){
+    return -1;
+  }
+  hvideo->total_length = length;
+  hvideo->current_length = 0;
+  // toggle the payload header
+  hvideo->video_frame_id ^= 0x01;
+  USBD_LL_FlushEP(pdev, VIDEO_IN_EP);
+  new_data_ready = 1;
+  return 0;
 }
 
 
 int8_t  VIDEO_Send_Video(USBD_HandleTypeDef *pdev, const uint8_t* data, uint32_t length)
 {
-	USBD_VIDEO_HandleTypeDef   *hvideo;
-	uint32_t tx_len = 0;
-	uint8_t* tx_buf;
-	hvideo = (USBD_VIDEO_HandleTypeDef*) pdev->pClassData;
-	tx_buf = hvideo->video_buffer;
-	if(length > VIDEO_BUFFER_SIZE){
-		return -1;
-	}
-	// each frame contains a frame type and frame ID
-	while(tx_len < length){
-		
-		tx_buf[0] = VIDEO_FRAME_TYPE;
-		tx_buf[1] = hvideo->video_frame_id;
-		memcpy(tx_buf+2, data, (VIDEO_XFER_SIZE-2));
-		tx_len += (VIDEO_XFER_SIZE-2);
-		data += (VIDEO_XFER_SIZE-2);
-		tx_buf += VIDEO_XFER_SIZE;
-	}
-	{
-		uint32_t act_len = tx_buf - hvideo->video_buffer;
-		uint32_t frame_cnt = (length + VIDEO_XFER_SIZE - 3) / (VIDEO_XFER_SIZE - 2);
-		length = length + frame_cnt*2;
-		if(act_len != length){
-			//while(1);
-		}
-	}
-	VIDEO_Start_Transmit_Video(pdev, tx_buf - hvideo->video_buffer);
-	
-	return 0;
+  USBD_VIDEO_HandleTypeDef   *hvideo;
+  uint32_t tx_len = 0;
+  uint8_t* tx_buf;
+  hvideo = (USBD_VIDEO_HandleTypeDef*) pdev->pClassData;
+  tx_buf = hvideo->video_buffer;
+  if(length > VIDEO_BUFFER_SIZE){
+    return -1;
+  }
+  // each frame contains a frame type and frame ID
+  while(tx_len < length){
+    
+    tx_buf[0] = VIDEO_FRAME_TYPE;
+    tx_buf[1] = hvideo->video_frame_id;
+    memcpy(tx_buf+2, data, (VIDEO_XFER_SIZE-2));
+    tx_len += (VIDEO_XFER_SIZE-2);
+    data += (VIDEO_XFER_SIZE-2);
+    tx_buf += VIDEO_XFER_SIZE;
+  }
+  {
+    uint32_t act_len = tx_buf - hvideo->video_buffer;
+    uint32_t frame_cnt = (length + VIDEO_XFER_SIZE - 3) / (VIDEO_XFER_SIZE - 2);
+    length = length + frame_cnt*2;
+    if(act_len != length){
+      //while(1);
+    }
+  }
+  VIDEO_Start_Transmit_Video(pdev, tx_buf - hvideo->video_buffer);
+  
+  return 0;
 }
 
 
@@ -826,22 +826,22 @@ static uint8_t  USBD_VIDEO_EP0_RxReady (USBD_HandleTypeDef *pdev)
   USBD_VIDEO_HandleTypeDef   *hvideo;
   hvideo = (USBD_VIDEO_HandleTypeDef*) pdev->pClassData;
   
-	if (hvideo->IsReportAvailable == 1)
+  if (hvideo->IsReportAvailable == 1)
   {
-		// TODO: parse control data, in hvideo->Report_buf[0]
+    // TODO: parse control data, in hvideo->Report_buf[0]
     //hvideo->Report_buf[0];
     hvideo->IsReportAvailable = 0;
   }
-	/*
-	if(hvideo->video_interface_changed){
-		if(hvideo->video_alt_setting){
-			((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->CameraOn(); 
-		}else{
-			((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->CameraOff(); 
-		}
-		hvideo->video_interface_changed = 0;
-	}
-	*/
+  /*
+  if(hvideo->video_interface_changed){
+    if(hvideo->video_alt_setting){
+      ((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->CameraOn(); 
+    }else{
+      ((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->CameraOff(); 
+    }
+    hvideo->video_interface_changed = 0;
+  }
+  */
 
   return USBD_OK;
 }
@@ -864,10 +864,10 @@ static uint8_t  USBD_VIDEO_EP0_TxReady (USBD_HandleTypeDef *pdev)
   */
 static uint8_t  USBD_VIDEO_SOF (USBD_HandleTypeDef *pdev)
 {
-	if(new_data_ready){
-		new_data_ready = 0;
-		USBD_VIDEO_DataIn(pdev, VIDEO_IN_EP);
-	}
+  if(new_data_ready){
+    new_data_ready = 0;
+    USBD_VIDEO_DataIn(pdev, VIDEO_IN_EP);
+  }
   return USBD_OK;
 }
 
@@ -881,7 +881,7 @@ void  USBD_VIDEO_Sync (USBD_HandleTypeDef *pdev, VIDEO_OffsetTypeDef offset)
 {
   USBD_VIDEO_HandleTypeDef   *hv;
   hv = (USBD_VIDEO_HandleTypeDef*) pdev->pClassData;
-	(void)hv;
+  (void)hv;
 }
 
 /**
@@ -920,17 +920,17 @@ static uint8_t  USBD_VIDEO_DataOut (USBD_HandleTypeDef *pdev,
 {
   USBD_VIDEO_HandleTypeDef   *hvideo;
   hvideo = (USBD_VIDEO_HandleTypeDef*) pdev->pClassData;
-	
-	if (epnum == CONTROL_OUT_EP){
-		// TODO: parse control data, 
-		control_t* ctrl = (control_t*)hvideo->control_buffer;
-		((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->ControlEvent(ctrl); 
-		
+  
+  if (epnum == CONTROL_OUT_EP){
+    // TODO: parse control data, 
+    control_t* ctrl = (control_t*)hvideo->control_buffer;
+    ((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->ControlEvent(ctrl); 
+    
     USBD_LL_PrepareReceive(pdev,
                            CONTROL_OUT_EP,
                            &hvideo->control_buffer[0],
                            CONTROL_PACKET_SIZE);  
-	}
+  }
   return USBD_OK;
 }
 

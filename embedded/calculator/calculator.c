@@ -31,7 +31,7 @@ static calc_state_t  state;
 static int translate_key_event(rt_uint16_t key)
 {
     switch(key){
-    case RTGUIK_0:  case RTGUIK_1:   case RTGUIK_2:   case RTGUIK_3:   case RTGUIK_4:
+    case RTGUIK_0:  case RTGUIK_1:  case RTGUIK_2:   case RTGUIK_3:   case RTGUIK_4:
     case RTGUIK_5:  case RTGUIK_6:  case RTGUIK_7:   case RTGUIK_8:
     case RTGUIK_9:           return key - RTGUIK_0;
     case RTGUIK_KP0:  case RTGUIK_KP1:  case RTGUIK_KP2:  case RTGUIK_KP3:  case RTGUIK_KP4:
@@ -132,9 +132,9 @@ static int calc_process_input(calc_state_t* s, int val)
             s->input_divider = s->input_divider*10;
         }else{
             s->cur_val = s->cur_val*10 + val;
-					  if(s->cur_val<1 && val == 0){
-							s->input_count--;
-						}
+            if(s->cur_val<1 && val == 0){
+              s->input_count--;
+            }
         }
         return 1;
     case DOT:
@@ -226,7 +226,7 @@ static int calc_process_display(calc_state_t* s)
     rtgui_lcdwidget_set_number(lcdwidget, ps, neg, memory, s->is_error);
     rtgui_widget_update(RTGUI_WIDGET(main_win));
     //rt_kprintf("%s  %s %s\n", res, s->is_error?"error":"succ", memory?"M": "");
-		return 0;
+    return 0;
 }
 
 static rt_bool_t calc_handle_key(struct rtgui_object *object, struct rtgui_event *event)
@@ -320,18 +320,18 @@ int calc_application_init(void)
 
         inited = RT_TRUE;
     }
-		return 0;
+    return 0;
 }
 INIT_APP_EXPORT(calc_application_init);
 
 
 long calc(int v)
 {
-	v = calc_process_input(&state, v);
-	if(v){
-		calc_process_display(&state);
-	}
-	return v;
+  v = calc_process_input(&state, v);
+  if(v){
+    calc_process_display(&state);
+  }
+  return v;
 }
 
 FINSH_FUNCTION_EXPORT(calc, manul input calc event);
